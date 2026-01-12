@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS EMPLOYEE(
     MaritalStatus ENUM('Married', 'Single', 'with kid/kids'),
     StaffCategory ENUM('Academic', 'Administrative')
     Department VARCHAR(50),
+    IsActive BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (EmpID),
 );
 
