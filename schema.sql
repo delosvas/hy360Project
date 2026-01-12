@@ -1,10 +1,10 @@
 -- HY360 PROJECT 2025/26: UNIVERSITY PAYROLL
 
---creating database
+-- creating database
 CREATE DATABASE IF NOT EXISTS UNI_PAYROLL;
 USE UNI_PAYROLL;
 
---employee table 
+-- employee table 
 CREATE TABLE IF NOT EXISTS EMPLOYEE(
     EmpID INTEGER NOT NULL AUTO_INCREMENT,
     FirstName VARCHAR(50),
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS EMPLOYEE(
     PRIMARY KEY (EmpID)
 );
 
---table for phones 
+-- table for phones 
 CREATE TABLE IF NOT EXISTS PHONE(
     EmpID INTEGER, 
     PhoneID VARCHAR(50) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS PHONE(
     FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID)
 );
 
---table for weak entity CHILD in case the employee has childen
+-- table for weak entity CHILD in case the employee has childen
 CREATE TABLE IF NOT EXISTS CHILD(
     ChildID INTEGER NOT NULL AUTO_INCREMENT,
     BirthDate DATE,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS CHILD(
     CHECK (DATE_SUB(CURRENT_DATE(), INTERVAL 18 YEAR)<BirthDate)
 );
 
---table for the payroll
+-- table for the payroll
 CREATE TABLE IF NOT EXISTS PAYROLL(
     PayrollID INTEGER NOT NULL, 
     PaymentDate DATE,
@@ -51,14 +51,14 @@ CREATE TABLE IF NOT EXISTS PAYROLL(
     FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID)
 );
 
---table for emplyoee working permanently in the university
+-- table for emplyoee working permanently in the university
 CREATE TABLE IF NOT EXISTS PERMANENT_EMPLOYEE(
     EmpID INTEGER,
     HireDate DATE,
     FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID)
 );
 
---table for emplyoee with a contract
+-- table for emplyoee with a contract
 CREATE TABLE IF NOT EXISTS CONTRACT_EMPLOYEE(
     EmpID INTEGER,
     ContractStart DATE,
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS CONTRACT_EMPLOYEE(
     FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID)
 );
 
---system setting table
+-- system setting table
 CREATE TABLE IF NOT EXISTS SYSTEM_SETTINGS(
     SettingKey VARCHAR(50),
     SettingValue DECIMAL(10,2)
