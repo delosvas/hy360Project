@@ -10,17 +10,13 @@ import java.util.List;
 public class EmployeeDAO {
 
     public int addEmployee(Employee emp) throws SQLException {
-
+        // SQL query to insert new employee (child_count removed - use children table)
         String sql = "INSERT INTO employees (full_name, emp_type, dept_id, is_married, address, phone, iban, bank_name, start_date, is_active) "
                 +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        Connection conn = DBConnection.getConnection();
-        PreparedStatement pstmt = null;
-        ResultSet generatedKeys = null;
-
-        try {
-            pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, emp.getFullName());
             pstmt.setString(2, emp.getType().name());
@@ -33,31 +29,17 @@ public class EmployeeDAO {
             pstmt.setDate(9, Date.valueOf(emp.getStartDate()));
             pstmt.setBoolean(10, emp.isActive());
 
-            int res = pstmt.executeUpdate();// returns number of rows affected
+            int res = pstmt.executeUpdate();
 
             if (res == 0) {
                 throw new SQLException("Creating employee failed, no rows affected.");
             }
 
-            generatedKeys = pstmt.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                return generatedKeys.getInt(1);// returns id
-            } else {
-                throw new SQLException("Creating employee failed, no ID obtained.");
-            }
-        } finally {
-            if (generatedKeys != null) {
-                try {
-                    generatedKeys.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (pstmt != null) {
-                try {
-                    pstmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Creating employee failed, no ID obtained.");
                 }
             }
         }
@@ -67,14 +49,9 @@ public class EmployeeDAO {
         List<Employee> list = new ArrayList<>();
         String query = "SELECT * FROM employees";
 
-        // ResultSet
-        Connection conn = DBConnection.getConnection();
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(query);
+        try (Connection conn = DBConnection.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(query)) {
 
             while (rs.next()) {
                 Employee e = new Employee();
@@ -83,30 +60,16 @@ public class EmployeeDAO {
                 e.setType(Employee.EmployeeType.valueOf(rs.getString("emp_type")));
                 e.setDeptId(rs.getInt("dept_id"));
                 e.setMarried(rs.getBoolean("is_married"));
+                // child_count removed - use ChildDAO to get children
                 e.setAddress(rs.getString("address"));
                 e.setPhone(rs.getString("phone"));
                 e.setIban(rs.getString("iban"));
                 e.setBankName(rs.getString("bank_name"));
+                // convert date to localdate
                 e.setStartDate(rs.getDate("start_date").toLocalDate());
                 e.setActive(rs.getBoolean("is_active"));
 
                 list.add(e);
-            }
-        } finally {
-            // Close ResultSet and Statement
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
             }
         }
         return list;
@@ -114,13 +77,11 @@ public class EmployeeDAO {
 
     public void deactivateEmployee(int empId) throws SQLException {
         String sql = "UPDATE employees SET is_active = FALSE WHERE emp_id = ?";
-        Connection conn = DBConnection.getConnection();
-        try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, empId);
             pstmt.executeUpdate();
-            pstmt.close();
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;
@@ -130,11 +91,8 @@ public class EmployeeDAO {
     public void updateEmployee(Employee emp) throws SQLException {
         String sql = "UPDATE employees SET full_name=?, dept_id=?, is_married=?, address=?, phone=?, iban=?, bank_name=? WHERE emp_id=?";
 
-        Connection conn = DBConnection.getConnection();
-        PreparedStatement pstmt = null;
-
-        try {
-            pstmt = conn.prepareStatement(sql);
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, emp.getFullName());
             pstmt.setInt(2, emp.getDeptId());
@@ -146,14 +104,6 @@ public class EmployeeDAO {
             pstmt.setInt(8, emp.getId());
 
             pstmt.executeUpdate();
-        } finally {
-            if (pstmt != null) {
-                try {
-                    pstmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 }

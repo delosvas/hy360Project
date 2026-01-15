@@ -13,11 +13,9 @@ public class PayrollDAO {
     public void saveLog(PayrollService.PayrollResult res) throws SQLException {
         String sql = "INSERT INTO payroll_log (emp_id, payment_date, base_salary, family_allowance, experience_allowance, research_allowance, library_allowance, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        Connection conn = DBConnection.getConnection();
-        PreparedStatement pstmt = null;
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-        try {
-            pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, res.empId);
             pstmt.setDate(2, Date.valueOf(res.date));
             pstmt.setDouble(3, res.base);
@@ -28,10 +26,6 @@ public class PayrollDAO {
             pstmt.setDouble(8, res.total);
 
             pstmt.executeUpdate();
-
-        } finally {
-            if (pstmt != null)
-                pstmt.close();
         }
     }
 }

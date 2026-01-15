@@ -19,33 +19,14 @@ public class SettingsDAO {
         Map<String, Double> settings = new HashMap<>();
         String sql = "SELECT config_key, config_value FROM system_settings";
 
-        Connection conn = DBConnection.getConnection();
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
+        try (Connection conn = DBConnection.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 String key = rs.getString(1); // Use column index instead of name
                 double value = rs.getDouble(2); // Use column index instead of name
                 settings.put(key, value);
-            }
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
             }
         }
         return settings;

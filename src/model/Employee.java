@@ -8,14 +8,19 @@ public class Employee {
         CA,
         PT,
         CT;
-        
+
         public String getDisplayName() {
             switch (this) {
-                case PA: return "Permanent Admin";
-                case CA: return "Contract Admin";
-                case PT: return "Permanent Teaching";
-                case CT: return "Contract Teaching";
-                default: return name();
+                case PA:
+                    return "Permanent Admin";
+                case CA:
+                    return "Contract Admin";
+                case PT:
+                    return "Permanent Teaching";
+                case CT:
+                    return "Contract Teaching";
+                default:
+                    return name();
             }
         }
     }
@@ -25,7 +30,6 @@ public class Employee {
     private EmployeeType type;
     private int deptId;
     private boolean isMarried;
-    //i removed childCount- use ChildDAO to get children
     private String address;
     private String phone;
     private String iban;

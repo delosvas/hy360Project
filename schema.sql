@@ -1,25 +1,16 @@
--- =====================================================
--- HY360 Project 2025 - University Payroll System
--- Database Schema (MySQL)
--- Phase 1: Database Design & SQL
--- =====================================================
+-- Database Schema for University Payroll System
 
 CREATE DATABASE IF NOT EXISTS university_payroll;
 USE university_payroll;
 
--- =====================================================
--- 1. DEPARTMENTS TABLE
--- =====================================================
+-- Departments Table
 CREATE TABLE IF NOT EXISTS departments (
     dept_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     INDEX idx_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- =====================================================
--- 2. EMPLOYEES TABLE (Supertype)
--- Implements disjoint specialization via emp_type ENUM
--- =====================================================
+-- Employees Table (with disjoint specialization: PA, CA, PT, CT)
 CREATE TABLE IF NOT EXISTS employees (
     emp_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
