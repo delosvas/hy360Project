@@ -1,0 +1,8 @@
+Για Powershell:
+compile:
+javac -cp ".;mysql-connector-j-8.0.33.jar" -d out (Get-ChildItem -Recurse -Filter *.java src).FullName
+
+run:
+java -cp "out;mysql-connector-j-8.0.33.jar" Main
+
+με maven ktlp its differant and honestly i dont know google it 

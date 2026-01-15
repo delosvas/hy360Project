@@ -1,83 +1,252 @@
--- HY360 PROJECT 2025/26: UNIVERSITY PAYROLL
+-- =====================================================
+-- HY360 Project 2025 - University Payroll System
+-- Database Schema (MySQL)
+-- Phase 1: Database Design & SQL
+-- =====================================================
 
--- creating database
-CREATE DATABASE IF NOT EXISTS UNI_PAYROLL;
-USE UNI_PAYROLL;
+CREATE DATABASE IF NOT EXISTS university_payroll;
+USE university_payroll;
 
--- employee table 
-CREATE TABLE IF NOT EXISTS EMPLOYEE(
-    EmpID INTEGER NOT NULL AUTO_INCREMENT,
-    FirstName VARCHAR(50),
-    LastName VARCHAR(50),
-    Address VARCHAR(50),
-    IBAN VARCHAR(100),
-    BankName VARCHAR(50),
-    MaritalStatus ENUM('Married', 'Single', 'with kid/kids'),
-    StaffCategory ENUM('Academic', 'Administrative'),
-    Department VARCHAR(50),
-    IsActive BOOLEAN DEFAULT TRUE,
-    PRIMARY KEY (EmpID)
-);
+-- =====================================================
+-- 1. DEPARTMENTS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS departments (
+    dept_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    INDEX idx_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- table for phones 
-CREATE TABLE IF NOT EXISTS PHONE(
-    EmpID INTEGER, 
-    PhoneID VARCHAR(50) NOT NULL,
-    CONSTRAINT CON_PHONE PRIMARY KEY (EmpID,PhoneID), 
-    FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID)
-);
+-- =====================================================
+-- 2. EMPLOYEES TABLE (Supertype)
+-- Implements disjoint specialization via emp_type ENUM
+-- =====================================================
+CREATE TABLE IF NOT EXISTS employees (
+    emp_id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    
+    -- Disjoint specialization: PA, CA, PT, CT
+    -- PA = Permanent Admin, CA = Contract Admin
+    -- PT = Permanent Teaching, CT = Contract Teaching
+    emp_type ENUM('PA', 'CA', 'PT', 'CT') NOT NULL,
+    
+    dept_id INT,
+    
+    -- Family status
+    is_married BOOLEAN DEFAULT FALSE,
+    
+    -- Contact and banking info
+    address VARCHAR(255),
+    phone VARCHAR(20),
+    iban VARCHAR(34),
+    bank_name VARCHAR(50),
+    
+    -- Employment dates
+    start_date DATE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    
+    -- Foreign Keys
+    FOREIGN KEY (dept_id) REFERENCES departments(dept_id) ON DELETE SET NULL,
+    
+    -- Constraints
+    CONSTRAINT chk_start_date_first_of_month 
+        CHECK (DAY(start_date) = 1),
+    
+    -- Indexes
+    INDEX idx_emp_type (emp_type),
+    INDEX idx_dept (dept_id),
+    INDEX idx_active (is_active),
+    INDEX idx_start_date (start_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- table for weak entity CHILD in case the employee has childen
-CREATE TABLE IF NOT EXISTS CHILD(
-    ChildID INTEGER NOT NULL AUTO_INCREMENT,
-    BirthDate DATE,
-    EmpID INTEGER,
-    CONSTRAINT CON_CHILD PRIMARY KEY (EmpID,ChildID),
-    FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID),
-    CHECK (DATE_SUB(CURRENT_DATE(), INTERVAL 18 YEAR)<BirthDate)
-);
 
--- table for the payroll
-CREATE TABLE IF NOT EXISTS PAYROLL(
-    PayrollID INTEGER NOT NULL, 
-    PaymentDate DATE,
-    EmpID INTEGER,
-    BaseSalary DECIMAL(10,2) DEFAULT 0.00,
-    FamilyAllowance DECIMAL(8,2) DEFAULT 0.00,
-    LibraryAllowance DECIMAL(8,2) DEFAULT 0.00,
-    ResearchAllowance DECIMAL(10,2) DEFAULT 0.00,
-    YearlyBonus DECIMAL(10,2) DEFAULT 0.00,
-    TotalAmount DECIMAL(10,2) DEFAULT 0.00,
-    FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID)
-);
+CREATE TABLE IF NOT EXISTS children (
+    child_id INT AUTO_INCREMENT PRIMARY KEY,
+    emp_id INT NOT NULL,
+    birth_date DATE NOT NULL,
+    
+    -- Foreign Keys
+    FOREIGN KEY (emp_id) REFERENCES employees(emp_id) ON DELETE CASCADE,
+    
+    -- prevent duplicate children for same employee
+    UNIQUE KEY unique_child (emp_id, birth_date),
+    
+    -- Indexes
+    INDEX idx_emp_id (emp_id),
+    INDEX idx_birth_date (birth_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- table for emplyoee working permanently in the university
-CREATE TABLE IF NOT EXISTS PERMANENT_EMPLOYEE(
-    EmpID INTEGER,
-    HireDate DATE,
-    FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID)
-);
 
--- table for emplyoee with a contract
-CREATE TABLE IF NOT EXISTS CONTRACT_EMPLOYEE(
-    EmpID INTEGER,
-    ContractStart DATE,
-    ContractEnd DATE,
-    ContractSalary DECIMAL(10,2) DEFAULT 0.00,
-    FOREIGN KEY (EmpID) REFERENCES EMPLOYEE(EmpID)
-);
 
--- system setting table
-CREATE TABLE IF NOT EXISTS SYSTEM_SETTINGS(
-    SettingKey VARCHAR(50),
-    SettingValue DECIMAL(10,2)
-);
+-- For Contract Admin and Contract Teaching employees
+CREATE TABLE IF NOT EXISTS contracts (
+    contract_id INT AUTO_INCREMENT PRIMARY KEY,
+    emp_id INT NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    gross_salary DECIMAL(10, 2) NOT NULL CHECK (gross_salary >= 0),
+    
+    -- Foreign Keys
+    FOREIGN KEY (emp_id) REFERENCES employees(emp_id) ON DELETE CASCADE,
+    
+    -- Constraints
+    CONSTRAINT chk_contract_start_first_of_month 
+        CHECK (DAY(start_date) = 1),
+    CONSTRAINT chk_contract_dates_valid 
+        CHECK (end_date >= start_date),
+    
+    -- Indexes
+    INDEX idx_emp_id (emp_id),
+    INDEX idx_dates (start_date, end_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO SYSTEM_SETTINGS (SettingKey, SettingValue) VALUES
-('BASE_SALARY', 1000.00),
-('FAMILY_ALLOWANCE', 0.05),
-('LIBRARY_ALLOWANCE', 100.00),
-('RESEARCH_ALLOWANCE', 200.00),
-('YEARLY_BONUS', 0.15);
 
--- VIEWS
+
+-- Historical record of all payroll payments
+
+CREATE TABLE IF NOT EXISTS payroll_log (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    emp_id INT NOT NULL,
+    payment_date DATE NOT NULL,
+    
+    -- Salary breakdown (saved for reporting)
+    base_salary DECIMAL(10, 2) DEFAULT 0.00,
+    family_allowance DECIMAL(10, 2) DEFAULT 0.00,
+    experience_allowance DECIMAL(10, 2) DEFAULT 0.00,
+    research_allowance DECIMAL(10, 2) DEFAULT 0.00,
+    library_allowance DECIMAL(10, 2) DEFAULT 0.00,
+    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
+    
+    -- Foreign Keys
+    FOREIGN KEY (emp_id) REFERENCES employees(emp_id) ON DELETE RESTRICT,
+    
+    -- Constraints
+    CONSTRAINT chk_payment_date_last_of_month 
+        CHECK (DAY(payment_date) = DAY(LAST_DAY(payment_date))),
+    
+    -- Indexes
+    INDEX idx_emp_id (emp_id),
+    INDEX idx_payment_date (payment_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- SYSTEM_SETTINGS TABLE
+
+CREATE TABLE IF NOT EXISTS system_settings (
+    config_key VARCHAR(50) PRIMARY KEY,
+    config_value DECIMAL(10, 2) NOT NULL,
+    description VARCHAR(255)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- departments
+INSERT IGNORE INTO departments (name) VALUES 
+    ('Computer Science'),
+    ('Physics'),
+    ('Mathematics'),
+    ('Chemistry'),
+    ('Biology');
+
+-- System settings
+INSERT IGNORE INTO system_settings (config_key, config_value, description) VALUES
+    ('BASE_SALARY_PA', 1000.00, 'Base salary for Permanent Admin'),
+    ('BASE_SALARY_PT', 1200.00, 'Base salary for Permanent Teaching'),
+    ('RESEARCH_ALLOWANCE', 300.00, 'Research allowance for Permanent Teaching'),
+    ('LIBRARY_ALLOWANCE', 100.00, 'Library allowance for Contract Teaching'),
+    ('EXPERIENCE_RATE', 0.15, '15% increase per year of service (after 1st year)'),
+    ('SPOUSE_ALLOWANCE_RATE', 0.05, '5% of base salary for spouse'),
+    ('CHILD_ALLOWANCE_RATE', 0.05, '5% of base salary per minor child (<18)');
+
+
+-- BONUS VIEWS
+
+-- View 1: Monthly Payroll Analysis by Category
+-- total cost employee count and average salary per employee type
+CREATE OR REPLACE VIEW view_monthly_payroll_analysis AS
+SELECT 
+    e.emp_type,
+    COUNT(DISTINCT p.emp_id) AS employee_count,
+    SUM(p.total_amount) AS total_cost,
+    AVG(p.total_amount) AS average_salary,
+    MIN(p.total_amount) AS min_salary,
+    MAX(p.total_amount) AS max_salary,
+    YEAR(p.payment_date) AS payment_year,
+    MONTH(p.payment_date) AS payment_month
+FROM payroll_log p
+JOIN employees e ON p.emp_id = e.emp_id
+GROUP BY e.emp_type, YEAR(p.payment_date), MONTH(p.payment_date)
+ORDER BY payment_year DESC, payment_month DESC, e.emp_type;
+
+-- Employee Full Details
+-- Complete employee information
+CREATE OR REPLACE VIEW view_employee_full_details AS
+SELECT 
+    e.emp_id,
+    e.full_name,
+    e.emp_type,
+    d.name AS department_name,
+    e.is_married,
+    COUNT(c.child_id) AS total_children,
+    COUNT(CASE WHEN DATEDIFF(CURDATE(), c.birth_date) / 365.25 < 18 THEN 1 END) AS minor_children,
+    e.address,
+    e.phone,
+    e.iban,
+    e.bank_name,
+    e.start_date,
+    e.is_active,
+    CASE 
+        WHEN e.emp_type IN ('CA', 'CT') THEN 
+            (SELECT COUNT(*) FROM contracts WHERE emp_id = e.emp_id 
+             AND CURDATE() BETWEEN start_date AND end_date)
+        ELSE 0
+    END AS has_active_contract
+FROM employees e
+LEFT JOIN departments d ON e.dept_id = d.dept_id
+LEFT JOIN children c ON e.emp_id = c.emp_id
+GROUP BY e.emp_id, e.full_name, e.emp_type, d.name, e.is_married, 
+         e.address, e.phone, e.iban, e.bank_name, e.start_date, e.is_active;
+
+-- View 3: Payroll Statistics
+-- Min/Max/Avg salary statistics per category
+CREATE OR REPLACE VIEW view_payroll_statistics AS
+SELECT 
+    e.emp_type,
+    COUNT(DISTINCT p.emp_id) AS total_employees_paid,
+    COUNT(p.log_id) AS total_payments,
+    MIN(p.total_amount) AS min_salary,
+    MAX(p.total_amount) AS max_salary,
+    AVG(p.total_amount) AS avg_salary,
+    SUM(p.total_amount) AS total_paid_all_time,
+    MIN(p.payment_date) AS first_payment_date,
+    MAX(p.payment_date) AS last_payment_date
+FROM payroll_log p
+JOIN employees e ON p.emp_id = e.emp_id
+GROUP BY e.emp_type
+ORDER BY e.emp_type;
+
+
+-- View: Active Employees Summary
+CREATE OR REPLACE VIEW view_active_employees AS
+SELECT 
+    e.emp_id,
+    e.full_name,
+    e.emp_type,
+    d.name AS department,
+    e.start_date,
+    e.is_married,
+    (SELECT COUNT(*) FROM children WHERE emp_id = e.emp_id) AS child_count
+FROM employees e
+LEFT JOIN departments d ON e.dept_id = d.dept_id
+WHERE e.is_active = TRUE
+ORDER BY e.emp_type, e.full_name;
+
+-- View: Monthly Cost by Category
+CREATE OR REPLACE VIEW view_monthly_cost_by_category AS
+SELECT 
+    e.emp_type,
+    SUM(p.total_amount) AS total_cost,
+    COUNT(DISTINCT p.emp_id) AS employee_count,
+    AVG(p.total_amount) AS average_salary
+FROM payroll_log p
+JOIN employees e ON p.emp_id = e.emp_id
+WHERE MONTH(p.payment_date) = MONTH(CURRENT_DATE()) 
+  AND YEAR(p.payment_date) = YEAR(CURRENT_DATE())
+GROUP BY e.emp_type;

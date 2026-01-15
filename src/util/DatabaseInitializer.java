@@ -1,0 +1,253 @@
+package util;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+/*** Database Initializer - Creates database and tables if they don't exist */
+public class DatabaseInitializer {
+
+        private static final String DB_URL_NO_DB = "jdbc:mysql://localhost:3306?serverTimezone=UTC";
+        private static final String DB_URL = "jdbc:mysql://localhost:3306/university_payroll?serverTimezone=UTC";
+        private static final String USER = "root";
+        private static final String PASSWORD = "1234";
+
+        public static void initialize() {
+                try {
+                        // create database if it doesn't exist
+                        try (Connection conn = DriverManager.getConnection(DB_URL_NO_DB, USER, PASSWORD);
+                                        Statement stmt = conn.createStatement()) {
+
+                                System.out.println("Creating database if it doesn't exist...");
+                                stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS university_payroll");
+                                System.out.println("Database 'university_payroll' ready.");
+                        }
+
+                        // create tables
+                        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+                                        Statement stmt = conn.createStatement()) {
+
+                                System.out.println("Creating tables...");
+
+                                stmt.executeUpdate(
+                                                "CREATE TABLE IF NOT EXISTS departments (" +
+                                                                "dept_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "name VARCHAR(100) NOT NULL UNIQUE, " +
+                                                                "INDEX idx_name (name)" +
+                                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                                // Employees table
+                                stmt.executeUpdate(
+                                                "CREATE TABLE IF NOT EXISTS employees (" +
+                                                                "emp_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "full_name VARCHAR(100) NOT NULL, " +
+                                                                "emp_type ENUM('PA', 'CA', 'PT', 'CT') NOT NULL, " +
+                                                                "dept_id INT, " +
+                                                                "is_married BOOLEAN DEFAULT FALSE, " +
+                                                                "address VARCHAR(255), " +
+                                                                "phone VARCHAR(20), " +
+                                                                "iban VARCHAR(34), " +
+                                                                "bank_name VARCHAR(50), " +
+                                                                "start_date DATE NOT NULL, " +
+                                                                "is_active BOOLEAN DEFAULT TRUE, " +
+                                                                "FOREIGN KEY (dept_id) REFERENCES departments(dept_id) ON DELETE SET NULL, "
+                                                                +
+                                                                "INDEX idx_emp_type (emp_type), " +
+                                                                "INDEX idx_dept (dept_id), " +
+                                                                "INDEX idx_active (is_active), " +
+                                                                "INDEX idx_start_date (start_date)" +
+                                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                                // children table
+                                stmt.executeUpdate(
+                                                "CREATE TABLE IF NOT EXISTS children (" +
+                                                                "child_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "emp_id INT NOT NULL, " +
+                                                                "birth_date DATE NOT NULL, " +
+                                                                "FOREIGN KEY (emp_id) REFERENCES employees(emp_id) ON DELETE CASCADE, "
+                                                                +
+                                                                "UNIQUE KEY unique_child (emp_id, birth_date), " +
+                                                                "INDEX idx_emp_id (emp_id), " +
+                                                                "INDEX idx_birth_date (birth_date)" +
+                                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                                // contracts table
+                                stmt.executeUpdate(
+                                                "CREATE TABLE IF NOT EXISTS contracts (" +
+                                                                "contract_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "emp_id INT NOT NULL, " +
+                                                                "start_date DATE NOT NULL, " +
+                                                                "end_date DATE NOT NULL, " +
+                                                                "gross_salary DECIMAL(10, 2) NOT NULL, " +
+                                                                "FOREIGN KEY (emp_id) REFERENCES employees(emp_id) ON DELETE CASCADE, "
+                                                                +
+                                                                "INDEX idx_emp_id (emp_id), " +
+                                                                "INDEX idx_dates (start_date, end_date)" +
+                                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                                // payroll log table
+                                stmt.executeUpdate(
+                                                "CREATE TABLE IF NOT EXISTS payroll_log (" +
+                                                                "log_id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                                                "emp_id INT NOT NULL, " +
+                                                                "payment_date DATE NOT NULL, " +
+                                                                "base_salary DECIMAL(10, 2) DEFAULT 0.00, " +
+                                                                "family_allowance DECIMAL(10, 2) DEFAULT 0.00, " +
+                                                                "experience_allowance DECIMAL(10, 2) DEFAULT 0.00, " +
+                                                                "research_allowance DECIMAL(10, 2) DEFAULT 0.00, " +
+                                                                "library_allowance DECIMAL(10, 2) DEFAULT 0.00, " +
+                                                                "total_amount DECIMAL(10, 2) NOT NULL, " +
+                                                                "FOREIGN KEY (emp_id) REFERENCES employees(emp_id) ON DELETE RESTRICT, "
+                                                                +
+                                                                "INDEX idx_emp_id (emp_id), " +
+                                                                "INDEX idx_payment_date (payment_date)" +
+                                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                                stmt.executeUpdate(
+                                                "CREATE TABLE IF NOT EXISTS system_settings (" +
+                                                                "config_key VARCHAR(50) PRIMARY KEY, " +
+                                                                "config_value DECIMAL(10, 2) NOT NULL, " +
+                                                                "description VARCHAR(255)" +
+                                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                                System.out.println("Tables created successfully.");
+                                System.out.println("Inserting default data...");
+
+                                // Departments
+                                stmt.executeUpdate(
+                                                "INSERT IGNORE INTO departments (name) VALUES " +
+                                                                "('Computer Science'), ('Physics'), ('Mathematics'), " +
+                                                                "('Chemistry'), ('Biology')");
+
+                                // System settings
+                                stmt.executeUpdate(
+                                                "INSERT IGNORE INTO system_settings (config_key, config_value, description) VALUES "
+                                                                +
+                                                                "('BASE_SALARY_PA', 1000.00, 'Base salary for Permanent Admin'), "
+                                                                +
+                                                                "('BASE_SALARY_PT', 1200.00, 'Base salary for Permanent Teaching'), "
+                                                                +
+                                                                "('RESEARCH_ALLOWANCE', 300.00, 'Research allowance for Permanent Teaching'), "
+                                                                +
+                                                                "('LIBRARY_ALLOWANCE', 100.00, 'Library allowance for Contract Teaching'), "
+                                                                +
+                                                                "('EXPERIENCE_RATE', 0.15, '15% increase per year of service (after 1st year)'), "
+                                                                +
+                                                                "('SPOUSE_ALLOWANCE_RATE', 0.05, '5% of base salary for spouse'), "
+                                                                +
+                                                                "('CHILD_ALLOWANCE_RATE', 0.05, '5% of base salary per minor child (<18)')");
+
+                                // Create views for bonuss!
+                                System.out.println("Creating views...");
+
+                                // View: Active Employees
+                                stmt.executeUpdate(
+                                                "CREATE OR REPLACE VIEW view_active_employees AS " +
+                                                                "SELECT e.emp_id, e.full_name, e.emp_type, d.name AS department, "
+                                                                +
+                                                                "e.start_date, e.is_married, " +
+                                                                "(SELECT COUNT(*) FROM children WHERE emp_id = e.emp_id) AS child_count "
+                                                                +
+                                                                "FROM employees e " +
+                                                                "LEFT JOIN departments d ON e.dept_id = d.dept_id " +
+                                                                "WHERE e.is_active = TRUE " +
+                                                                "ORDER BY e.emp_type, e.full_name");
+
+                                // monthly Cost by Category
+                                stmt.executeUpdate(
+                                                "CREATE OR REPLACE VIEW view_monthly_cost_by_category AS " +
+                                                                "SELECT e.emp_type, SUM(p.total_amount) AS total_cost, "
+                                                                +
+                                                                "COUNT(DISTINCT p.emp_id) AS employee_count, " +
+                                                                "AVG(p.total_amount) AS average_salary " +
+                                                                "FROM payroll_log p " +
+                                                                "JOIN employees e ON p.emp_id = e.emp_id " +
+                                                                "WHERE MONTH(p.payment_date) = MONTH(CURRENT_DATE()) " +
+                                                                "AND YEAR(p.payment_date) = YEAR(CURRENT_DATE()) " +
+                                                                "GROUP BY e.emp_type");
+
+                                // monthly Payroll Analysis
+                                stmt.executeUpdate(
+                                                "CREATE OR REPLACE VIEW view_monthly_payroll_analysis AS " +
+                                                                "SELECT e.emp_type, COUNT(DISTINCT p.emp_id) AS employee_count, "
+                                                                +
+                                                                "SUM(p.total_amount) AS total_cost, AVG(p.total_amount) AS average_salary, "
+                                                                +
+                                                                "MIN(p.total_amount) AS min_salary, MAX(p.total_amount) AS max_salary, "
+                                                                +
+                                                                "YEAR(p.payment_date) AS payment_year, MONTH(p.payment_date) AS payment_month "
+                                                                +
+                                                                "FROM payroll_log p " +
+                                                                "JOIN employees e ON p.emp_id = e.emp_id " +
+                                                                "GROUP BY e.emp_type, YEAR(p.payment_date), MONTH(p.payment_date) "
+                                                                +
+                                                                "ORDER BY payment_year DESC, payment_month DESC, e.emp_type");
+
+                                // View: Employee Full Details
+                                stmt.executeUpdate(
+                                                "CREATE OR REPLACE VIEW view_employee_full_details AS " +
+                                                                "SELECT e.emp_id, e.full_name, e.emp_type, d.name AS department_name, "
+                                                                +
+                                                                "e.is_married, COUNT(c.child_id) AS total_children, " +
+                                                                "COUNT(CASE WHEN DATEDIFF(CURDATE(), c.birth_date) / 365.25 < 18 THEN 1 END) AS minor_children, "
+                                                                +
+                                                                "e.address, e.phone, e.iban, e.bank_name, e.start_date, e.is_active, "
+                                                                +
+                                                                "CASE WHEN e.emp_type IN ('CA', 'CT') THEN " +
+                                                                "(SELECT COUNT(*) FROM contracts WHERE emp_id = e.emp_id "
+                                                                +
+                                                                "AND CURDATE() BETWEEN start_date AND end_date) ELSE 0 END AS has_active_contract "
+                                                                +
+                                                                "FROM employees e " +
+                                                                "LEFT JOIN departments d ON e.dept_id = d.dept_id " +
+                                                                "LEFT JOIN children c ON e.emp_id = c.emp_id " +
+                                                                "GROUP BY e.emp_id, e.full_name, e.emp_type, d.name, e.is_married, "
+                                                                +
+                                                                "e.address, e.phone, e.iban, e.bank_name, e.start_date, e.is_active");
+
+                                // View: Pay Slip Details (Missing view fix)
+                                stmt.executeUpdate(
+                                                "CREATE OR REPLACE VIEW view_pay_slip_details AS " +
+                                                                "SELECT p.log_id, e.full_name, e.emp_type, p.payment_date, "
+                                                                +
+                                                                "p.base_salary, p.family_allowance, p.experience_allowance, "
+                                                                +
+                                                                "p.research_allowance, p.library_allowance, p.total_amount "
+                                                                +
+                                                                "FROM payroll_log p " +
+                                                                "JOIN employees e ON p.emp_id = e.emp_id");
+
+                                // View: Payroll Statistics (Min/Max/Avg)
+                                stmt.executeUpdate(
+                                                "CREATE OR REPLACE VIEW view_payroll_statistics AS " +
+                                                                "SELECT e.emp_type, " +
+                                                                "MIN(p.total_amount) AS min_salary, " +
+                                                                "MAX(p.total_amount) AS max_salary, " +
+                                                                "AVG(p.total_amount) AS avg_salary " +
+                                                                "FROM payroll_log p " +
+                                                                "JOIN employees e ON p.emp_id = e.emp_id " +
+                                                                "GROUP BY e.emp_type");
+
+                                System.out.println("Views created successfully.");
+                                System.out.println("Database initialized successfully!");
+
+                        } catch (SQLException e) {
+                                if (e.getMessage().contains("CHECK") || e.getMessage().contains("constraint")) {
+                                        System.out.println(
+                                                        "Warning: Some CHECK constraints may not be supported by your MySQL version.");
+                                        System.out.println(
+                                                        "Tables created, but date validations should be handled in application code.");
+                                } else {
+                                        throw e;
+                                }
+                        }
+
+                } catch (SQLException e) {
+                        System.err.println("Database initialization error: " + e.getMessage());
+                        e.printStackTrace();
+                        throw new RuntimeException(
+                                        "Failed to initialize database. Please check MySQL connection and credentials.",
+                                        e);
+                }
+        }
+}
