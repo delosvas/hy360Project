@@ -195,7 +195,7 @@ ORDER BY e.emp_type, e.full_name;
 
 -- View 3 : Contract Renewal Status
 -- used to alert the system when a new cotract renewal should be made
-Create OR REPLACE VIEW view_contract_renewal_status AS
+CREATE OR REPLACE VIEW view_contract_renewal_status AS
 SELECT 
 	e.emp_id,
 	e.full_name,
@@ -220,4 +220,5 @@ DROP VIEW IF EXISTS view_monthly_cost_by_category;
 DROP VIEW IF EXISTS view_payroll_statistics;
 DROP VIEW IF EXISTS view_monthly_payroll_analysis;
 DROP VIEW IF EXISTS view_pay_slip_details;
+
 
