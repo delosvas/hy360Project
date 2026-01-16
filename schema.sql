@@ -209,7 +209,7 @@ SELECT
 		ELSE 'OK'
 	END AS renewal_message
 	FROM employees e 
-	JOIN contract c ON e.emp_id=c.emp_id
+	JOIN contracts c ON e.emp_id=c.emp_id
 	JOIN departments d ON d.dept_id=e.dept_id
 	WHERE e.is_active = TRUE 
 		AND (e.emp_type='CA' OR e.emp_type='CT')
@@ -220,5 +220,6 @@ DROP VIEW IF EXISTS view_monthly_cost_by_category;
 DROP VIEW IF EXISTS view_payroll_statistics;
 DROP VIEW IF EXISTS view_monthly_payroll_analysis;
 DROP VIEW IF EXISTS view_pay_slip_details;
+
 
 
