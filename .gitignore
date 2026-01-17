@@ -1,0 +1,7 @@
+# Compiled output
+/out/
+*.class
+
+# IDE files
+.classpath
+.project
