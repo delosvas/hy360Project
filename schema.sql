@@ -1,5 +1,5 @@
 -- Database Schema for University Payroll System
--- to puch DatabaseIntializer.java, PayrollDAO.java, ReportsPanel.java, PayrollPanel.java, PayrollService.java
+
 CREATE DATABASE IF NOT EXISTS university_payroll;
 USE university_payroll;
 
