@@ -1,5 +1,5 @@
 -- Database Schema for University Payroll System
--- to puch DatabaseIntializer.java, PayrollDAO.java, ReportsPanel.java, PayrollPanel.java, PayrollService.java
+
 CREATE DATABASE IF NOT EXISTS university_payroll;
 USE university_payroll;
 
@@ -220,6 +220,7 @@ DROP VIEW IF EXISTS view_monthly_cost_by_category;
 DROP VIEW IF EXISTS view_payroll_statistics;
 DROP VIEW IF EXISTS view_monthly_payroll_analysis;
 DROP VIEW IF EXISTS view_pay_slip_details;
+
 
 
 
