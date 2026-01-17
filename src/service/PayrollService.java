@@ -1,6 +1,7 @@
 package service;
 
 import dao.ChildDAO;
+import dao.PayrollDAO;
 import dao.SettingsDAO;
 import model.Contract;
 import model.Employee;
@@ -32,11 +33,13 @@ public class PayrollService {
 
     private SettingsDAO settingsDAO;
     private ChildDAO childDAO;
+    private PayrollDAO payrollDAO;
     private Map<String, Double> config;
 
     public PayrollService() {
         settingsDAO = new SettingsDAO();
         childDAO = new ChildDAO();
+        payrollDAO = new PayrollDAO();
         try {
             config = settingsDAO.getAllSettings();
             if (config.isEmpty()) {
@@ -134,6 +137,9 @@ public class PayrollService {
         res.setLibrary(libraryAllowance);
         res.setResearch(researchAllowance);
         res.setTotal(total);
+        if(res.getTotal()>0) {
+        	payrollDAO.saveLog(res);
+        }
         
         return res;
     }

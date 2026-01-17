@@ -74,6 +74,40 @@ public class EmployeeDAO {
         }
         return list;
     }
+    
+    public Employee getEmployeeById(int emp_id) throws SQLException {
+    	String sql="SELECT * FROM employees WHERE emp_id = ?";
+    	try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql)){
+                
+    		pstmt.setInt(1, emp_id);
+    		ResultSet rs = pstmt.executeQuery();
+    			
+    		if(rs.next()) {
+    			Employee e = new Employee();
+    			e.setId(rs.getInt("emp_id"));
+                e.setFullName(rs.getString("full_name"));
+                e.setType(Employee.EmployeeType.valueOf(rs.getString("emp_type")));
+                e.setDeptId(rs.getInt("dept_id"));
+                e.setMarried(rs.getBoolean("is_married"));
+                // child_count removed - use ChildDAO to get children
+                e.setAddress(rs.getString("address"));
+                e.setPhone(rs.getString("phone"));
+                e.setIban(rs.getString("iban"));
+                e.setBankName(rs.getString("bank_name"));
+                // convert date to localdate
+                e.setStartDate(rs.getDate("start_date").toLocalDate());
+                e.setActive(rs.getBoolean("is_active"));
+                
+                return e;   
+    		}else {
+    			return null;
+    			
+    		}
+  	
+    	}
+		
+    }
 
     public void deactivateEmployee(int empId) throws SQLException {
         String sql = "UPDATE employees SET is_active = FALSE WHERE emp_id = ?";

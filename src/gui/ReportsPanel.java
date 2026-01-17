@@ -4,6 +4,10 @@ import util.DBConnection;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import dao.EmployeeDAO;
+import model.Employee;
+
 import java.awt.*;
 import java.sql.*;
 import java.util.Vector;
@@ -60,7 +64,13 @@ public class ReportsPanel extends JPanel {
         predefinedPanel.add(statusLabel, BorderLayout.SOUTH);
 
         // Events
-        btnRun.addActionListener(e -> generateReport());
+        btnRun.addActionListener(e -> {
+			try {
+				generateReport();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+		});
 
         tabbedPane.addTab("Standard Reports", predefinedPanel);
 
@@ -97,7 +107,7 @@ public class ReportsPanel extends JPanel {
         add(tabbedPane, BorderLayout.CENTER);
     }
 
-    private void generateReport() {
+    private void generateReport() throws SQLException {
         String selected = (String) reportSelector.getSelectedItem();
         String sql = "";
 
@@ -132,6 +142,13 @@ public class ReportsPanel extends JPanel {
                 return;
             try {
                 int empId = Integer.parseInt(input.trim());
+                EmployeeDAO empDAO = new EmployeeDAO();
+                if(empDAO.getEmployeeById(empId)==null) {
+                	JOptionPane.showMessageDialog(this, "Employee with Id " + empId + " is not registered!", "Error",
+                			JOptionPane.ERROR_MESSAGE);
+                	return;
+                }
+                
                 sql = "SELECT e.emp_id, e.full_name, e.emp_type, e.start_date, " +
                         "p.payment_date, p.total_amount, p.base_salary, p.family_allowance " +
                         "FROM employees e " +
