@@ -1,6 +1,8 @@
 package gui;
 
+import dao.ContractDAO;
 import dao.EmployeeDAO;
+import model.Contract;
 import model.Employee;
 
 import javax.swing.*;
@@ -96,16 +98,31 @@ public class EmployeesPanel extends JPanel {
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
-            // ask for termination date
-            String dateStr = JOptionPane.showInputDialog(this,
-                    "Enter Termination Date (YYYY-MM-DD).\nMust be the last day of the month:",
-                    LocalDate.now().toString());
-
-            if (dateStr == null)
-                return; // cancelled
-
+            
             try {
+            	
+            	Employee emp = myDao.getAllEmployees().stream().filter(e1 -> e1.getId() ==
+            			(int)tableModel.getValueAt(r, 0)).findFirst().orElse(null);
+            			
+                if(emp == null) {
+                	return;
+                }
+
+                if(emp.getType() == Employee.EmployeeType.CA || emp.getType() == Employee.EmployeeType.CT) {
+                	JOptionPane.showMessageDialog(this, "Termination must concern only permanent employees!",
+                            "Action is prohibited", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // ask for termination date
+                String dateStr = JOptionPane.showInputDialog(this,
+                        "Enter Termination Date (YYYY-MM-DD).\nMust be the last day of the month:",
+                        LocalDate.now().toString());
+
+                if (dateStr == null)
+                    return; // cancelled
+
+            	
                 LocalDate termDate = LocalDate.parse(dateStr.trim());
 
                 // validate last day of month
@@ -156,13 +173,15 @@ public class EmployeesPanel extends JPanel {
                 try {
                     List<Employee> data = get();
                     for (Employee e : data) {
+                    	String activeStatus = (e.isActive() && !LocalDate.now().isBefore(e.getStartDate())) ? "Active" : "Inactive";
+               
                         Object[] row = {
                                 e.getId(),
                                 e.getFullName(),
                                 e.getType(),
                                 e.getDeptId(),
                                 e.getStartDate(),
-                                e.isActive() ? "Active" : "Inactive"
+                                activeStatus
                         };
                         tableModel.addRow(row);
                     }

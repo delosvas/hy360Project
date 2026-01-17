@@ -101,6 +101,8 @@ public class AddEmployeeDialog extends JDialog {
         // Start Date
         formPanel.add(new JLabel("Start Date (YYYY-MM-DD) (*):"));
         txtStartDate.setToolTipText("Format: YYYY-MM-DD. Used for Experience Allowance calculation.");
+        txtStartDate.setEditable(false);
+        txtStartDate.setFocusable(false);
         formPanel.add(txtStartDate);
 
         mainPanel.add(formPanel);
@@ -325,9 +327,11 @@ public class AddEmployeeDialog extends JDialog {
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Invalid number for Amount.",
                     "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return; 
         } catch (DateTimeParseException ex) {
             JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.", "Validation Error",
                     JOptionPane.ERROR_MESSAGE);
+            return;
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);

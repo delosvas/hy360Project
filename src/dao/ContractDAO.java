@@ -23,7 +23,7 @@ public class ContractDAO {
         }
     }
 
-    public Contract getActiveContract(int empId, LocalDate date) throws SQLException {
+    public static Contract getActiveContract(int empId, LocalDate date) throws SQLException {
         String sql = "SELECT * FROM contracts WHERE emp_id = ? AND ? BETWEEN start_date AND end_date ORDER BY start_date DESC LIMIT 1";
 
         try (Connection conn = DBConnection.getConnection();
@@ -31,7 +31,7 @@ public class ContractDAO {
 
             pstmt.setInt(1, empId);
             pstmt.setDate(2, Date.valueOf(date));
-
+            
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     Contract c = new Contract();

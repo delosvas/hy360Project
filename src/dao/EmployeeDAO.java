@@ -1,11 +1,15 @@
 package dao;
 
+import model.Contract;
 import model.Employee;
 import util.DBConnection;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JOptionPane;
 
 public class EmployeeDAO {
 
@@ -68,10 +72,19 @@ public class EmployeeDAO {
                 // convert date to localdate
                 e.setStartDate(rs.getDate("start_date").toLocalDate());
                 e.setActive(rs.getBoolean("is_active"));
+           
+                
 
                 list.add(e);
             }
-        }
+            
+            for(Employee e: list)
+            	if(e.getType() == Employee.EmployeeType.CA || e.getType() == Employee.EmployeeType.CT) {
+            		Contract active= ContractDAO.getActiveContract(e.getId(), LocalDate.now());
+            		e.setActive(active!=null);
+            	}
+        	}
+        
         return list;
     }
     

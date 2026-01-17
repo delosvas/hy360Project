@@ -2,6 +2,8 @@ package model;
 
 import java.time.LocalDate;
 
+import dao.ContractDAO;
+
 public class Employee {
     public enum EmployeeType {
         PA,
@@ -24,7 +26,7 @@ public class Employee {
             }
         }
     }
-
+    
     private int id;
     private String fullName;
     private EmployeeType type;

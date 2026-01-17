@@ -190,7 +190,21 @@ SELECT
     (SELECT COUNT(*) FROM children WHERE emp_id = e.emp_id) AS child_count
 FROM employees e
 LEFT JOIN departments d ON e.dept_id = d.dept_id
-WHERE e.is_active = TRUE
+WHERE
+	(
+		e.emp_type IN ('PA', 'PT')
+		AND e.is_active = TRUE
+	) 
+	OR
+	(
+		e.emp_type IN ('CA', 'CT')
+		AND EXISTS (
+			SELECT 1
+			FROM contracts c
+			WHERE e.emp_id = c.emp_id
+				AND CURRENT_DATE BETWEEN c.start_date AND c.end_date
+		)
+	)
 ORDER BY e.emp_type, e.full_name;
 
 -- View 3 : Contract Renewal Status
