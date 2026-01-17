@@ -136,17 +136,17 @@ public class PayrollPanel extends JPanel {
                         // Save to DB
                         payrollDAO.saveLog(result);
 
-                        grandTotal += result.total;
+                        grandTotal += result.getTotal();
 
                         publish(new Object[] {
                                 emp.getId(),
                                 emp.getFullName(),
                                 emp.getType(),
-                                String.format("%.2f", result.base),
-                                String.format("%.2f", result.family),
-                                String.format("%.2f", result.experience),
-                                String.format("%.2f", result.research + result.library),
-                                String.format("%.2f", result.total)
+                                String.format("%.2f", result.getBase()),
+                                String.format("%.2f", result.getFamily()),
+                                String.format("%.2f", result.getExperience()),
+                                String.format("%.2f", result.getResearch() + result.getLibrary()),
+                                String.format("%.2f", result.getTotal())
                         });
                     }
                 } catch (Exception ex) {

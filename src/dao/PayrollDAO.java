@@ -16,14 +16,14 @@ public class PayrollDAO {
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setInt(1, res.empId);
-            pstmt.setDate(2, Date.valueOf(res.date));
-            pstmt.setDouble(3, res.base);
-            pstmt.setDouble(4, res.family);
-            pstmt.setDouble(5, res.experience);
-            pstmt.setDouble(6, res.research);
-            pstmt.setDouble(7, res.library);
-            pstmt.setDouble(8, res.total);
+            pstmt.setInt(1, res.getEmpId());
+            pstmt.setDate(2, Date.valueOf(res.getDate()));
+            pstmt.setDouble(3, res.getBase());
+            pstmt.setDouble(4, res.getFamily());
+            pstmt.setDouble(5, res.getExperience());
+            pstmt.setDouble(6, res.getResearch());
+            pstmt.setDouble(7, res.getLibrary());
+            pstmt.setDouble(8, res.getTotal());
 
             pstmt.executeUpdate();
         }

@@ -11,7 +11,7 @@ public class DatabaseInitializer {
         private static final String DB_URL_NO_DB = "jdbc:mysql://localhost:3306?serverTimezone=UTC";
         private static final String DB_URL = "jdbc:mysql://localhost:3306/university_payroll?serverTimezone=UTC";
         private static final String USER = "root";
-        private static final String PASSWORD = "1234";
+        private static final String PASSWORD = "";
 
         public static void initialize() {
                 try {
@@ -137,7 +137,7 @@ public class DatabaseInitializer {
                                                                 +
                                                                 "('CHILD_ALLOWANCE_RATE', 0.05, '5% of base salary per minor child (<18)')");
 
-                                // Create views for bonuss!
+                                // Create views for bonus!
                                 System.out.println("Creating views...");
 
                                 // View: Active Employees
@@ -153,35 +153,27 @@ public class DatabaseInitializer {
                                                                 "WHERE e.is_active = TRUE " +
                                                                 "ORDER BY e.emp_type, e.full_name");
 
-                                // monthly Cost by Category
+                                // View: Contract Renewal Status
                                 stmt.executeUpdate(
-                                                "CREATE OR REPLACE VIEW view_monthly_cost_by_category AS " +
-                                                                "SELECT e.emp_type, SUM(p.total_amount) AS total_cost, "
-                                                                +
-                                                                "COUNT(DISTINCT p.emp_id) AS employee_count, " +
-                                                                "AVG(p.total_amount) AS average_salary " +
-                                                                "FROM payroll_log p " +
-                                                                "JOIN employees e ON p.emp_id = e.emp_id " +
-                                                                "WHERE MONTH(p.payment_date) = MONTH(CURRENT_DATE()) " +
-                                                                "AND YEAR(p.payment_date) = YEAR(CURRENT_DATE()) " +
-                                                                "GROUP BY e.emp_type");
-
-                                // monthly Payroll Analysis
-                                stmt.executeUpdate(
-                                                "CREATE OR REPLACE VIEW view_monthly_payroll_analysis AS " +
-                                                                "SELECT e.emp_type, COUNT(DISTINCT p.emp_id) AS employee_count, "
-                                                                +
-                                                                "SUM(p.total_amount) AS total_cost, AVG(p.total_amount) AS average_salary, "
-                                                                +
-                                                                "MIN(p.total_amount) AS min_salary, MAX(p.total_amount) AS max_salary, "
-                                                                +
-                                                                "YEAR(p.payment_date) AS payment_year, MONTH(p.payment_date) AS payment_month "
-                                                                +
-                                                                "FROM payroll_log p " +
-                                                                "JOIN employees e ON p.emp_id = e.emp_id " +
-                                                                "GROUP BY e.emp_type, YEAR(p.payment_date), MONTH(p.payment_date) "
-                                                                +
-                                                                "ORDER BY payment_year DESC, payment_month DESC, e.emp_type");
+                                                "CREATE OR REPLACE VIEW view_contract_renewal_status AS "
+                                                			+ "SELECT "
+                                                			+ "	e.emp_id,"
+                                                			+ "	e.full_name,"
+                                                			+ "	d.name AS department,"
+                                                			+ "	c.contract_id,"
+                                                			+ "	c.start_date,"
+                                                			+ "	c.end_date,"
+                                                			+ "	CASE "
+                                                			+ "		WHEN DATEDIFF(c.end_date, CURDATE())<=30 THEN \"URGENT: Less than a month left\""
+                                                			+ "		WHEN DATEDIFF(c.end_date, CURDATE())<=60 THEN \"RENEWAL IS NEEDED\""
+                                                			+ "		ELSE 'OK'"
+                                                			+ "	END AS renewal_message"
+                                                			+ "	FROM employees e "
+                                                			+ "	JOIN contracts c ON e.emp_id=c.emp_id"
+                                                			+ "	JOIN departments d ON d.dept_id=e.dept_id"
+                                                			+ "	WHERE e.is_active = TRUE"
+                                                			+ "		AND (e.emp_type='CA' OR e.emp_type='CT')"
+                                                			+ "	    AND CURDATE()<=c.end_date;");
 
                                 // View: Employee Full Details
                                 stmt.executeUpdate(
@@ -204,29 +196,6 @@ public class DatabaseInitializer {
                                                                 "GROUP BY e.emp_id, e.full_name, e.emp_type, d.name, e.is_married, "
                                                                 +
                                                                 "e.address, e.phone, e.iban, e.bank_name, e.start_date, e.is_active");
-
-                                // View: Pay Slip Details (Missing view fix)
-                                stmt.executeUpdate(
-                                                "CREATE OR REPLACE VIEW view_pay_slip_details AS " +
-                                                                "SELECT p.log_id, e.full_name, e.emp_type, p.payment_date, "
-                                                                +
-                                                                "p.base_salary, p.family_allowance, p.experience_allowance, "
-                                                                +
-                                                                "p.research_allowance, p.library_allowance, p.total_amount "
-                                                                +
-                                                                "FROM payroll_log p " +
-                                                                "JOIN employees e ON p.emp_id = e.emp_id");
-
-                                // View: Payroll Statistics (Min/Max/Avg)
-                                stmt.executeUpdate(
-                                                "CREATE OR REPLACE VIEW view_payroll_statistics AS " +
-                                                                "SELECT e.emp_type, " +
-                                                                "MIN(p.total_amount) AS min_salary, " +
-                                                                "MAX(p.total_amount) AS max_salary, " +
-                                                                "AVG(p.total_amount) AS avg_salary " +
-                                                                "FROM payroll_log p " +
-                                                                "JOIN employees e ON p.emp_id = e.emp_id " +
-                                                                "GROUP BY e.emp_type");
 
                                 System.out.println("Views created successfully.");
                                 System.out.println("Database initialized successfully!");

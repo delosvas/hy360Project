@@ -103,15 +103,18 @@ public class ReportsPanel extends JPanel {
 
         if ("Payroll Status per Category".equals(selected)) {
             // "Κατάσταση μισθοδοσίας ανά κατηγορία προσωπικού"
-            sql = "SELECT emp_type, employee_count, total_cost, average_salary, payment_year, payment_month " +
-                    "FROM view_monthly_payroll_analysis ORDER BY payment_year DESC, payment_month DESC, emp_type";
+            sql = "SELECT e.emp_type, COUNT(*) employee_count, SUM(total_amount) AS total_cost, "
+            		+ "AVG(total_amount) AS average_salary, YEAR(payment_date) AS payment_year, MONTH(payment_date) AS payment_month " +
+                    "FROM payroll_log p JOIN employees e ON p.emp_id = e.emp_id "
+            		+ "GROUP BY payment_year, payment_month, emp_type "
+                    + "ORDER BY payment_year DESC, payment_month DESC, emp_type";
 
         } else if ("Salary Stats (Min/Max/Avg) per Category".equals(selected)) {
             // "Μεγιστος, ελάχιστος και μέσος μισθός ανά κατηγορία προσωπικού"
             sql = "SELECT e.emp_type, " +
                     "MAX(p.total_amount) as Max_Salary, " +
                     "MIN(p.total_amount) as Min_Salary, " +
-                    "AVG(p.total_amount) as Ang_Salary " +
+                    "AVG(p.total_amount) as Avg_Salary " +
                     "FROM payroll_log p JOIN employees e ON p.emp_id = e.emp_id " +
                     "GROUP BY e.emp_type";
 
@@ -120,8 +123,7 @@ public class ReportsPanel extends JPanel {
             sql = "SELECT YEAR(payment_date) as Year, MONTH(payment_date) as Month, " +
                     "AVG(total_amount) as Avg_Salary, " +
                     "AVG(family_allowance + experience_allowance + research_allowance + library_allowance) as Avg_Allowances "
-                    +
-                    "FROM payroll_log GROUP BY Year, Month ORDER BY Year DESC, Month DESC";
+                    +"FROM payroll_log GROUP BY Year, Month ORDER BY Year DESC, Month DESC";
 
         } else if ("Employee Specific Details & Payroll".equals(selected)) {
             // "Στοιχεία και μισθοδοσία συγκεκριμένου υπαλλήλου"

@@ -1,5 +1,5 @@
 -- Database Schema for University Payroll System
-
+-- to puch DatabaseIntializer.java, PayrollDAO.java, ReportsPanel.java, PayrollPanel.java, PayrollService.java
 CREATE DATABASE IF NOT EXISTS university_payroll;
 USE university_payroll;
 
@@ -213,7 +213,7 @@ SELECT
 	JOIN departments d ON d.dept_id=e.dept_id
 	WHERE e.is_active = TRUE 
 		AND (e.emp_type='CA' OR e.emp_type='CT')
-	AND CURDATE()<=c.end_date;
+		AND CURDATE()<=c.end_date;
 	
 -- delete these after execution of MySql / phpMyAdmin
 DROP VIEW IF EXISTS view_monthly_cost_by_category;

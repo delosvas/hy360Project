@@ -88,7 +88,7 @@ public class PayrollService {
                 if (activeContract != null && activeContract.isValid(paymentDate)) {
                     baseSalary = activeContract.getGrossSalary();
                 } else {
-                    return new PayrollResult(emp.getId(), paymentDate, 0, 0, 0, 0, 0, 0);
+                    return new PayrollResult();
                 }
                 break;
         }
@@ -124,33 +124,97 @@ public class PayrollService {
         }
 
         double total = baseSalary + experienceAllowance + familyAllowance + researchAllowance + libraryAllowance;
-
-        return new PayrollResult(emp.getId(), paymentDate, baseSalary, familyAllowance, experienceAllowance,
-                researchAllowance,
-                libraryAllowance, total);
+        
+        PayrollResult res = new PayrollResult();
+        res.setEmpId(emp.getId());
+        res.setDate(paymentDate);
+        res.setbase(baseSalary);
+        res.setExperience(experienceAllowance); 
+        res.setFamily(familyAllowance);
+        res.setLibrary(libraryAllowance);
+        res.setResearch(researchAllowance);
+        res.setTotal(total);
+        
+        return res;
     }
 
-    // Inner class to hold result
+ // Inner class to hold result
     public static class PayrollResult {
-        public int empId;
-        public LocalDate date;
-        public double base;
-        public double family;
-        public double experience;
-        public double research;
-        public double library;
-        public double total;
+        private int empId;
+        private LocalDate date;
+        private double base;
+        private double family;
+        private double experience;
+        private double research;
+        private double library;
+        private double total;
 
-        public PayrollResult(int empId, LocalDate date, double base, double family, double experience, double research,
-                double library, double total) {
+        public PayrollResult() {
+        }
+        
+        public int getEmpId() {
+            return empId;
+        }
+
+        public void setEmpId(int empId) {
             this.empId = empId;
-            this.date = date;
-            this.base = base;
-            this.family = family;
-            this.experience = experience;
-            this.research = research;
-            this.library = library;
-            this.total = total;
+        }
+        
+        public LocalDate getDate() {
+            return date;
+        }
+
+        public void setDate(LocalDate date) {
+        	this.date = date;
+        }
+        
+
+        public double getBase() {
+            return base;
+        }
+
+        public void setbase(double base) {
+        	this.base = base;
+        }
+        
+        public double getFamily() {
+            return family;
+        }
+
+        public void setFamily(double family) {
+        	this.family = family;
+        }
+       
+        public double getExperience() {
+            return experience;
+        }
+
+        public void setExperience(double experience) {
+        	this.experience = experience;
+        }
+        
+        public double getResearch() {
+            return research;
+        }
+
+        public void setResearch(double research) {
+        	this.research = research;
+        }
+        
+        public double getLibrary() {
+            return library;
+        }
+
+        public void setLibrary(double library) {
+        	this.library = library;
+        }
+        
+        public double getTotal() {
+            return total;
+        }
+
+        public void setTotal(double total) {
+        	this.total = total;
         }
     }
 }
