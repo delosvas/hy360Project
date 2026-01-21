@@ -7,13 +7,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * SettingsDao
+ * 
  * Data Access Object for System Settings
  * Handles salary configuration parameters
+ * 
+ * It's responsible for:
+ * 1. retrieve all settings as key-value pairs
+ * 2. retrieve a specific key
+ * 3. update a setting with a new value
+ * 
  */
 public class SettingsDAO {
 
     /**
-     * Get all system settings
+     * Get all system settings from the database
+     * @return A Map<String, Double> where:
+     *         - key   = config_key (e.g., "BASE_SALARY")
+     *         - value = config_value (numeric setting)
+     *
+     * @throws SQLException if any database error occurs
      */
     public Map<String, Double> getAllSettings() throws SQLException {
         Map<String, Double> settings = new HashMap<>();
@@ -23,6 +36,7 @@ public class SettingsDAO {
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
 
+        	// Go through all rows and fill the map
             while (rs.next()) {
                 String key = rs.getString(1); // Use column index instead of name
                 double value = rs.getDouble(2); // Use column index instead of name
@@ -54,6 +68,7 @@ public class SettingsDAO {
                 if (rs.next()) {
                     currentValue = rs.getDouble("config_value");
                 } else {
+                	// If the key wasn't found then there's a data integrity issue
                     throw new SQLException("Setting key not found: " + configKey);
                 }
             }
@@ -79,6 +94,13 @@ public class SettingsDAO {
 
     /**
      * Get a specific setting value
+     * 
+     * @param configKey The key of the setting to retrieve
+     * @return The numeric value of the setting
+     *
+     * @throws SQLException if:
+     *         • The key does not exist
+     *         • A database error occurs
      */
     public double getSetting(String configKey) throws SQLException {
         String sql = "SELECT config_value FROM system_settings WHERE config_key = ?";
@@ -91,6 +113,7 @@ public class SettingsDAO {
                 if (rs.next()) {
                     return rs.getDouble("config_value");
                 } else {
+                	// Missing key indicates incomplete configuration
                     throw new SQLException("Setting key not found: " + configKey);
                 }
             }

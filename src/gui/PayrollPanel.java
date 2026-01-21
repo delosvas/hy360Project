@@ -8,11 +8,21 @@ import model.Employee;
 import service.PayrollService;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/*
+ * Payroll Pane
+ * 
+ * this panel is responsible for:
+ * 1. selecting a month and year
+ * 2. doing payroll calculations for all employees
+ * 3. showing the payroll results in a table
+ * 4. showing total cost payroll for a selected period
+ */
 public class PayrollPanel extends JPanel {
 
     private JComboBox<String> cmbMonth;
@@ -22,31 +32,43 @@ public class PayrollPanel extends JPanel {
     private JLabel lblTotalCost;
     private JLabel lblStatus;
 
+    /* 
+     * Constructor that builds the payroll UI
+     */
     public PayrollPanel() {
         setLayout(new BorderLayout());
 
         // Top Panel: Configuration
         JPanel configPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-        configPanel.add(new JLabel("Month:"));
+        configPanel.setBackground(new Color(245, 245, 245));
+        configPanel.setForeground(new Color(230, 230, 250));
+        configPanel.add(new JLabel("Month:")); 
+        // Month selector
         String[] months = { "January", "February", "March", "April", "May", "June", "July", "August", "September",
                 "October", "November", "December" };
         cmbMonth = new JComboBox<>(months);
+        cmbMonth.setFont(new Font("Arial" ,Font.PLAIN, 14));
         configPanel.add(cmbMonth);
 
-        configPanel.add(new JLabel("Year:"));
+        // Year selector
+        configPanel.add(new JLabel("Year:") {{setFont(new Font("Arial" ,Font.PLAIN, 14));}});
         Integer[] years = new Integer[11];
         int currentYear = LocalDate.now().getYear();
         for (int i = 0; i <= 10; i++)
             years[i] = currentYear - 5 + i; // 5 years back, 5 forward
         cmbYear = new JComboBox<>(years);
+        cmbYear.setFont(new Font("Arial" ,Font.PLAIN, 14));
         cmbYear.setSelectedItem(currentYear);
         configPanel.add(cmbYear);
 
+        // Run Payroll button
         JButton btnCalculate = new JButton("Run Payroll");
+        btnCalculate.setFont(new Font("Arial" ,Font.PLAIN, 12));
         configPanel.add(btnCalculate);
 
+        // Button for clearing results
         JButton btnClear = new JButton("Clear");
+        btnClear.setFont(new Font("Arial" ,Font.PLAIN, 12));
         configPanel.add(btnClear);
 
         add(configPanel, BorderLayout.NORTH);
@@ -59,20 +81,43 @@ public class PayrollPanel extends JPanel {
 
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
+            // Table model is not editable
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
 
+        // Table setup
         resultTable = new JTable(tableModel);
+        resultTable.setFont(new Font("Arial" ,Font.PLAIN, 14));
+        resultTable.setRowHeight(20);
+        resultTable.getTableHeader().setFont(new Font("Arial" ,Font.BOLD, 14));
+        resultTable.setFillsViewportHeight(true);
+        resultTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        resultTable.getColumnModel().getColumn(7).setCellRenderer(new DefaultTableCellRenderer(){
+        	public Component getTableCellRendererComponent(JTable table, Object value, 
+        			boolean isSelected, boolean hasFocus, int row, int column) { 
+        		Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); 
+        		if (!isSelected) { 
+        			c.setBackground(new Color(200, 255, 200));  
+        		} 
+        		setHorizontalAlignment(SwingConstants.RIGHT);
+        		return c; 
+        		} 
+        	});
+        
         add(new JScrollPane(resultTable), BorderLayout.CENTER);
 
         // Bottom: Status and Totals
         JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(new Color(245, 245, 245));
+        bottomPanel.setForeground(new Color(245, 245, 245));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         lblStatus = new JLabel("Ready");
+        lblStatus.setFont(new Font("Arial" ,Font.PLAIN, 14));
         lblTotalCost = new JLabel("Total Payroll Cost: 0.00 €");
+        lblTotalCost.setForeground(new Color(0, 102, 204));
         lblTotalCost.setFont(new Font("Arial", Font.BOLD, 14));
 
         bottomPanel.add(lblStatus, BorderLayout.WEST);
@@ -81,18 +126,22 @@ public class PayrollPanel extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
 
         // Listeners
-        btnCalculate.addActionListener(e -> runPayrollCalculation());
-        btnClear.addActionListener(e -> {
+        btnCalculate.addActionListener(e -> runPayrollCalculation()); // Run payroll calculation
+        btnClear.addActionListener(e -> { // Clear table and reset
             tableModel.setRowCount(0);
             lblTotalCost.setText("Total Payroll Cost: 0.00 €");
             lblStatus.setText("Cleared");
         });
     }
 
+    /*
+     * Does the payroll calculation using SwingWorker
+     */
     private void runPayrollCalculation() {
         tableModel.setRowCount(0); // Clear previous results
         lblStatus.setText("Calculating...");
 
+        // Get selected year and month
         int year = (Integer) cmbYear.getSelectedItem();
         int monthIndex = cmbMonth.getSelectedIndex() + 1; // 1-12
 
@@ -113,7 +162,7 @@ public class PayrollPanel extends JPanel {
 
                     List<Employee> employees = employeeDAO.getAllEmployees();
 
-                    for (Employee emp : employees) {
+                    for (Employee emp : employees) { // Skip inactive employees
                         if (!emp.isActive())
                             continue;
 
@@ -125,20 +174,22 @@ public class PayrollPanel extends JPanel {
                             continue;
                         }
 
+                        // Get employee if it is a contract based employee
                         Contract contract = null;
                         if (emp.getType() == Employee.EmployeeType.CA || emp.getType() == Employee.EmployeeType.CT) {
                             contract = contractDAO.getActiveContract(emp.getId(), paymentDate);
                         }
 
+                        // Do payroll calculation
                         PayrollService.PayrollResult result = payrollService.calculateSalary(emp, paymentDate,
                                 contract);
 
                         // Save to DB
                         payrollDAO.saveLog(result);
 
-                        grandTotal += result.getTotal();
+                        grandTotal += result.getTotal(); // Add to total payroll cost
 
-                        publish(new Object[] {
+                        publish(new Object[] { // Publish row to the table
                                 emp.getId(),
                                 emp.getFullName(),
                                 emp.getType(),
@@ -158,7 +209,7 @@ public class PayrollPanel extends JPanel {
 
             @Override
             protected void process(List<Object[]> chunks) {
-                for (Object[] row : chunks) {
+                for (Object[] row : chunks) { // Add every published row on the table
                     tableModel.addRow(row);
                 }
             }
@@ -167,6 +218,7 @@ public class PayrollPanel extends JPanel {
             protected void done() {
                 try {
                     get(); // Check for exceptions
+                    // Update UI with the final results
                     lblTotalCost.setText(String.format("Total Payroll Cost: %.2f €", grandTotal));
                     lblStatus.setText("Calculation Completed for " + paymentDate);
                 } catch (Exception e) {
@@ -176,6 +228,6 @@ public class PayrollPanel extends JPanel {
                     e.printStackTrace();
                 }
             }
-        }.execute();
+        }.execute(); // Start with background task
     }
 }
