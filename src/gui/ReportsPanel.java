@@ -3,6 +3,7 @@ package gui;
 import util.DBConnection;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import dao.EmployeeDAO;
@@ -12,6 +13,16 @@ import java.awt.*;
 import java.sql.*;
 import java.util.Vector;
 
+/*
+ * Reports Panel
+ * 
+ * This panel provides:
+ * 1. Pre-Defined Reports in Tab1 -> user selects a report type from a dropdown
+ * 								  -> system executes the corresponding SQL query
+ * 2. Custom SQL execution in Tab2 ->user u=inserts any SQL query manually
+ * 								   -> system executes and displays results
+ * 
+ */
 public class ReportsPanel extends JPanel {
 
     // Components for Tab 1 (Pre-defined)
@@ -26,44 +37,70 @@ public class ReportsPanel extends JPanel {
     private DefaultTableModel customTableModel;
     private JLabel customStatusLabel;
 
+    /**
+     * Constructor that builds the entire UI. Creates a tabbed interface with 
+     * Pre-Defined Reports and Custom SQL execution
+     */
     public ReportsPanel() {
         setLayout(new BorderLayout());
 
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        // --- TAB 1: Pre-defined Reports ---
+        // TAB 1: Pre-defined Reports
         JPanel predefinedPanel = new JPanel(new BorderLayout());
+        predefinedPanel.setBackground(new Color(245, 245, 245));
 
         // Top: Filter/Selection
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        topPanel.add(new JLabel("Select Report:"));
+        topPanel.setBackground(new Color(245, 245, 245));
+        topPanel.add(new JLabel("Select Report:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
 
-        String[] reports = {
+        String[] reports = { // List of available predefined reports
                 "Payroll Status per Category",
                 "Salary Stats (Min/Max/Avg) per Category",
                 "Average Salary Trend per Period",
                 "Employee Specific Details & Payroll",
                 "Total Payroll Cost per Category"
         };
+        
         reportSelector = new JComboBox<>(reports);
+        reportSelector.setFont(new Font("Arial" ,Font.PLAIN, 12));
         topPanel.add(reportSelector);
 
-        JButton btnRun = new JButton("Generate Report");
+        JButton btnRun = new JButton("Generate Report"); // Button to run the selected report
+        btnRun.setFont(new Font("Arial" ,Font.PLAIN, 12));
         topPanel.add(btnRun);
 
         predefinedPanel.add(topPanel, BorderLayout.NORTH);
 
-        // Center: Results
+        // Center: Results table
         tableModel = new DefaultTableModel();
         reportTable = new JTable(tableModel);
+        reportTable.setFillsViewportHeight(true);
+        reportTable.setRowHeight(22);
+        reportTable.getTableHeader().setFont(new Font("Arial" ,Font.BOLD, 12));
+        reportTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        // Alternate row coloring for readability
+        reportTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
+        	public Component getTableCellRendererComponent(JTable table, Object value, 
+        			boolean isSelected, boolean hasFocus, int row, int column) { 
+        		Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column); 
+        		if (!isSelected) { 
+        			c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(235, 245, 255)); 
+        		} 
+        		return c; 
+        		} 
+        	});
         predefinedPanel.add(new JScrollPane(reportTable), BorderLayout.CENTER);
 
-        // Bottom: Status
+        // Bottom: Status label
         statusLabel = new JLabel("Ready");
+        statusLabel.setFont(new Font("Arial" ,Font.PLAIN, 12));
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         predefinedPanel.add(statusLabel, BorderLayout.SOUTH);
 
-        // Events
+        // Run report button action
         btnRun.addActionListener(e -> {
 			try {
 				generateReport();
@@ -72,47 +109,74 @@ public class ReportsPanel extends JPanel {
 			}
 		});
 
-        tabbedPane.addTab("Standard Reports", predefinedPanel);
+        // Custom tab label 
+        JLabel tab1= new JLabel("Standard Reports");
+        tab1.setFont(new Font("Arial" ,Font.BOLD, 14));
+        tab1.setForeground(new Color(30, 30, 30));
+        tab1.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
+        
+        tabbedPane.addTab(null, predefinedPanel);
+        tabbedPane.setTabComponentAt(tabbedPane.getTabCount() - 1, tab1);
 
-        // --- TAB 2: Custom SQL ---
+        // TAB 2: Custom SQL
         JPanel customSqlPanel = new JPanel(new BorderLayout());
+        customSqlPanel.setBackground(new Color(245, 245, 245));
 
         // Top: Text Area + Button
         JPanel inputPanel = new JPanel(new BorderLayout());
         inputPanel.setBorder(BorderFactory.createTitledBorder("Enter SQL Query"));
+        inputPanel.setBackground(new Color(245, 245, 245));
 
         sqlTextArea = new JTextArea(5, 40);
+        sqlTextArea.setFont(new Font("Arial" ,Font.PLAIN, 12));
         inputPanel.add(new JScrollPane(sqlTextArea), BorderLayout.CENTER);
 
         JButton executeBtn = new JButton("Execute SQL");
+        executeBtn.setFont(new Font("Arial" ,Font.PLAIN, 12));
         executeBtn.addActionListener(e -> executeCustomQuery());
         JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        btnPanel.setBackground(new Color(245, 245, 245));
         btnPanel.add(executeBtn);
         inputPanel.add(btnPanel, BorderLayout.SOUTH);
-
+        
         customSqlPanel.add(inputPanel, BorderLayout.NORTH);
 
-        // Center: Results
+        // Center: Results table
         customTableModel = new DefaultTableModel();
         customTable = new JTable(customTableModel);
+        customTable.setFillsViewportHeight(true);
+        customTable.setRowHeight(20);
+        customTable.getTableHeader().setFont(new Font("Arial" ,Font.BOLD, 12));
+        customTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         customSqlPanel.add(new JScrollPane(customTable), BorderLayout.CENTER);
 
-        // Bottom: Status
+        // Bottom: Status label
         customStatusLabel = new JLabel("Ready to execute custom queries.");
+        customStatusLabel.setFont(new Font("Arial" ,Font.BOLD, 12));
         customStatusLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         customSqlPanel.add(customStatusLabel, BorderLayout.SOUTH);
 
-        tabbedPane.addTab("Custom SQL Queries", customSqlPanel);
+        JLabel tab2= new JLabel("Custom SQL Queries");
+        tab2.setFont(new Font("Arial" ,Font.BOLD, 14));
+        tab2.setForeground(new Color(30, 30, 30));
+        tab2.setBorder(BorderFactory.createEmptyBorder(3, 5, 3, 5));
+        tabbedPane.addTab(null, customSqlPanel);
+        tabbedPane.setTabComponentAt(tabbedPane.getTabCount() - 1, tab2);
 
-        add(tabbedPane, BorderLayout.CENTER);
+        add(tabbedPane, BorderLayout.CENTER); // Add tabbed pane to the main panel
     }
 
+    /*
+     * Generates a predefined report based on the user's selection of a query.
+     * 
+     * @throws SQLException
+     */
     private void generateReport() throws SQLException {
         String selected = (String) reportSelector.getSelectedItem();
         String sql = "";
 
         if ("Payroll Status per Category".equals(selected)) {
-            // "Κατάσταση μισθοδοσίας ανά κατηγορία προσωπικού"
+       
             sql = "SELECT e.emp_type, COUNT(*) employee_count, SUM(total_amount) AS total_cost, "
             		+ "AVG(total_amount) AS average_salary, YEAR(payment_date) AS payment_year, MONTH(payment_date) AS payment_month " +
                     "FROM payroll_log p JOIN employees e ON p.emp_id = e.emp_id "
@@ -120,7 +184,7 @@ public class ReportsPanel extends JPanel {
                     + "ORDER BY payment_year DESC, payment_month DESC, emp_type";
 
         } else if ("Salary Stats (Min/Max/Avg) per Category".equals(selected)) {
-            // "Μεγιστος, ελάχιστος και μέσος μισθός ανά κατηγορία προσωπικού"
+            
             sql = "SELECT e.emp_type, " +
                     "MAX(p.total_amount) as Max_Salary, " +
                     "MIN(p.total_amount) as Min_Salary, " +
@@ -129,14 +193,15 @@ public class ReportsPanel extends JPanel {
                     "GROUP BY e.emp_type";
 
         } else if ("Average Salary Trend per Period".equals(selected)) {
-            // "Μέση αύξηση μισθών και επιδομάτων ανά χρονική περίοδο"
+            
             sql = "SELECT YEAR(payment_date) as Year, MONTH(payment_date) as Month, " +
                     "AVG(total_amount) as Avg_Salary, " +
                     "AVG(family_allowance + experience_allowance + research_allowance + library_allowance) as Avg_Allowances "
                     +"FROM payroll_log GROUP BY Year, Month ORDER BY Year DESC, Month DESC";
 
         } else if ("Employee Specific Details & Payroll".equals(selected)) {
-            // "Στοιχεία και μισθοδοσία συγκεκριμένου υπαλλήλου"
+            
+        	// Asking user for employeeID
             String input = JOptionPane.showInputDialog(this, "Enter Employee ID:");
             if (input == null || input.trim().isEmpty())
                 return;
@@ -155,23 +220,28 @@ public class ReportsPanel extends JPanel {
                         "LEFT JOIN payroll_log p ON e.emp_id = p.emp_id " +
                         "WHERE e.emp_id = " + empId + " " +
                         "ORDER BY p.payment_date DESC";
+                
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(this, "Invalid ID format", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
         } else if ("Total Payroll Cost per Category".equals(selected)) {
-            // "Συνολικό ύψος μισθοδοσίας ανά κατηγορία προσωπικού"
+           
             sql = "SELECT e.emp_type, SUM(p.total_amount) as Total_Cost " +
                     "FROM payroll_log p JOIN employees e ON p.emp_id = e.emp_id " +
                     "GROUP BY e.emp_type";
         }
 
+        // Execute SQL query and display results
         if (sql != null && !sql.isEmpty()) {
             executeAndDisplay(sql, reportTable, statusLabel);
         }
     }
 
+    /*
+     * Executes a custom SQL query entered by the user.
+     */
     private void executeCustomQuery() {
         String sql = sqlTextArea.getText().trim();
         if (sql.isEmpty()) {
@@ -180,7 +250,7 @@ public class ReportsPanel extends JPanel {
             return;
         }
 
-        // Basic safety check (very primitive)
+        // Primitive safety check for potentially "dangerous" queries
         if (!sql.toUpperCase().startsWith("SELECT") && !sql.toUpperCase().startsWith("SHOW")
                 && !sql.toUpperCase().startsWith("DESCRIBE")) {
             int confirm = JOptionPane.showConfirmDialog(this,
@@ -193,6 +263,13 @@ public class ReportsPanel extends JPanel {
         executeAndDisplay(sql, customTable, customStatusLabel);
     }
 
+    /*
+     *Executes a SQL query and displays the results in a JTable.
+     *
+     *@param sql
+     *@param targetTable
+     *@param targetStatus
+     */
     private void executeAndDisplay(String sql, JTable targetTable, JLabel targetStatus) {
         targetStatus.setText("Executing query...");
 
@@ -203,15 +280,15 @@ public class ReportsPanel extends JPanel {
                         Statement stmt = conn.createStatement();
                         ResultSet rs = stmt.executeQuery(sql)) {
 
-                    return buildTableModel(rs);
+                    return buildTableModel(rs); // Convert ResultSet into TableModel
                 }
             }
 
             @Override
             protected void done() {
                 try {
-                    DefaultTableModel model = get();
-                    targetTable.setModel(model);
+                    DefaultTableModel model = get(); // Retrieve result from background thread
+                    targetTable.setModel(model); // Update the table 
                     targetStatus.setText("Query executed successfully. Rows: " + model.getRowCount());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -227,17 +304,23 @@ public class ReportsPanel extends JPanel {
         }.execute();
     }
 
+    /*
+     * Converts a ResultSet into a DefaultTableModel, allowing the table to adapt to any SQL query result.
+     * 
+     * @param rs
+     * @throws SQLException
+     */
     public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
         ResultSetMetaData metaData = rs.getMetaData();
 
-        // names of columns
+        // Extract names of columns
         Vector<String> columnNames = new Vector<>();
         int columnCount = metaData.getColumnCount();
         for (int column = 1; column <= columnCount; column++) {
             columnNames.add(metaData.getColumnLabel(column)); // Use getColumnLabel for aliases
         }
 
-        // data of the table
+        // Get data of the table
         Vector<Vector<Object>> data = new Vector<>();
         while (rs.next()) {
             Vector<Object> vector = new Vector<>();
@@ -246,7 +329,8 @@ public class ReportsPanel extends JPanel {
             }
             data.add(vector);
         }
-
+ 
+        // Non-editable table model
         return new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {

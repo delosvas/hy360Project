@@ -5,17 +5,24 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/*** Database Initializer - Creates database and tables if they don't exist */
+/**
+ * Database Initializer 
+ * 
+ * Utility class that creates database and tables if they don't exist 
+ */
 public class DatabaseInitializer {
 
         private static final String DB_URL_NO_DB = "jdbc:mysql://localhost:3306?serverTimezone=UTC";
         private static final String DB_URL = "jdbc:mysql://localhost:3306/university_payroll?serverTimezone=UTC";
         private static final String USER = "root";
-        private static final String PASSWORD = "";
+        private static final String PASSWORD = "1234";
 
+        /*
+         * Initializes the database schema and default data.
+         */
         public static void initialize() {
                 try {
-                        // create database if it doesn't exist
+                        // Create database if it doesn't exist
                         try (Connection conn = DriverManager.getConnection(DB_URL_NO_DB, USER, PASSWORD);
                                         Statement stmt = conn.createStatement()) {
 
@@ -24,12 +31,13 @@ public class DatabaseInitializer {
                                 System.out.println("Database 'university_payroll' ready.");
                         }
 
-                        // create tables
+                        // Create tables and insert default data
                         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
                                         Statement stmt = conn.createStatement()) {
 
                                 System.out.println("Creating tables...");
 
+                                // Departments table
                                 stmt.executeUpdate(
                                                 "CREATE TABLE IF NOT EXISTS departments (" +
                                                                 "dept_id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -59,7 +67,7 @@ public class DatabaseInitializer {
                                                                 "INDEX idx_start_date (start_date)" +
                                                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-                                // children table
+                                // Children table
                                 stmt.executeUpdate(
                                                 "CREATE TABLE IF NOT EXISTS children (" +
                                                                 "child_id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -72,7 +80,7 @@ public class DatabaseInitializer {
                                                                 "INDEX idx_birth_date (birth_date)" +
                                                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-                                // contracts table
+                                // Contracts table
                                 stmt.executeUpdate(
                                                 "CREATE TABLE IF NOT EXISTS contracts (" +
                                                                 "contract_id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -86,7 +94,7 @@ public class DatabaseInitializer {
                                                                 "INDEX idx_dates (start_date, end_date)" +
                                                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-                                // payroll log table
+                                // Payroll log table
                                 stmt.executeUpdate(
                                                 "CREATE TABLE IF NOT EXISTS payroll_log (" +
                                                                 "log_id INT AUTO_INCREMENT PRIMARY KEY, " +
@@ -103,6 +111,7 @@ public class DatabaseInitializer {
                                                                 "INDEX idx_emp_id (emp_id), " +
                                                                 "INDEX idx_payment_date (payment_date)" +
                                                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+                                // System Settings table
                                 stmt.executeUpdate(
                                                 "CREATE TABLE IF NOT EXISTS system_settings (" +
                                                                 "config_key VARCHAR(50) PRIMARY KEY, " +
@@ -113,13 +122,13 @@ public class DatabaseInitializer {
                                 System.out.println("Tables created successfully.");
                                 System.out.println("Inserting default data...");
 
-                                // Departments
+                                // Default Departments
                                 stmt.executeUpdate(
                                                 "INSERT IGNORE INTO departments (name) VALUES " +
                                                                 "('Computer Science'), ('Physics'), ('Mathematics'), " +
                                                                 "('Chemistry'), ('Biology')");
 
-                                // System settings
+                                // Default System settings
                                 stmt.executeUpdate(
                                                 "INSERT IGNORE INTO system_settings (config_key, config_value, description) VALUES "
                                                                 +
@@ -140,7 +149,7 @@ public class DatabaseInitializer {
                                 // Create views for bonus!
                                 System.out.println("Creating views...");
 
-                                // View: Active Employees
+                                // View 1: Active Employees
                                 stmt.executeUpdate(
                                                 "CREATE OR REPLACE VIEW view_active_employees AS " +
                                                                 "SELECT e.emp_id, e.full_name, e.emp_type, d.name AS department, "
@@ -153,7 +162,7 @@ public class DatabaseInitializer {
                                                                 "WHERE e.is_active = TRUE " +
                                                                 "ORDER BY e.emp_type, e.full_name");
 
-                                // View: Contract Renewal Status
+                                // View 2: Contract Renewal Status
                                 stmt.executeUpdate(
                                                 "CREATE OR REPLACE VIEW view_contract_renewal_status AS "
                                                 			+ "SELECT "
@@ -175,7 +184,7 @@ public class DatabaseInitializer {
                                                 			+ "		AND (e.emp_type='CA' OR e.emp_type='CT')"
                                                 			+ "	    AND CURDATE()<=c.end_date;");
 
-                                // View: Employee Full Details
+                                // View 3: Employee Full Details
                                 stmt.executeUpdate(
                                                 "CREATE OR REPLACE VIEW view_employee_full_details AS " +
                                                                 "SELECT e.emp_id, e.full_name, e.emp_type, d.name AS department_name, "

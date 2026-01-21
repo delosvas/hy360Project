@@ -36,6 +36,9 @@ public class PayrollService {
     private PayrollDAO payrollDAO;
     private Map<String, Double> config;
 
+    /*
+     * Constructor that initializes DAO and loads configuration settings.
+     */
     public PayrollService() {
         settingsDAO = new SettingsDAO();
         childDAO = new ChildDAO();
@@ -66,10 +69,23 @@ public class PayrollService {
         return defaults;
     }
 
+    /*
+     * Helper method to retrieve safely the configuration values
+     */
     private double getCfg(String key) {
         return config.getOrDefault(key, 0.0);
     }
 
+    /*
+     * Main salary calculation method
+     * 
+     * @param emp            The employee whose salary is being calculated
+     * @param paymentDate    The payroll date
+     * @param activeContract The employee's active contract (if applicable)
+     *
+     * @return PayrollResult containing all salary components
+     *
+     */
     public PayrollResult calculateSalary(Employee emp, LocalDate paymentDate, Contract activeContract)
             throws SQLException {
         double baseSalary = 0.0;
@@ -88,6 +104,7 @@ public class PayrollService {
                 break;
             case CA:
             case CT:
+            	// checking if the contract employees have a solid contract
                 if (activeContract != null && activeContract.isValid(paymentDate)) {
                     baseSalary = activeContract.getGrossSalary();
                 } else {
@@ -119,6 +136,7 @@ public class PayrollService {
 
         familyAllowance = baseSalary * familyRate;
 
+        // Additional allowances for the teaching staff
         if (emp.getType() == Employee.EmployeeType.PT) {
             researchAllowance = getCfg("RESEARCH_ALLOWANCE");
         }
@@ -126,8 +144,10 @@ public class PayrollService {
             libraryAllowance = getCfg("LIBRARY_ALLOWANCE");
         }
 
+        // Total Salary 
         double total = baseSalary + experienceAllowance + familyAllowance + researchAllowance + libraryAllowance;
         
+        // Save the payroll log entry
         PayrollResult res = new PayrollResult();
         res.setEmpId(emp.getId());
         res.setDate(paymentDate);
@@ -137,6 +157,7 @@ public class PayrollService {
         res.setLibrary(libraryAllowance);
         res.setResearch(researchAllowance);
         res.setTotal(total);
+        
         if(res.getTotal()>0) {
         	payrollDAO.saveLog(res);
         }
@@ -144,7 +165,7 @@ public class PayrollService {
         return res;
     }
 
- // Inner class to hold result
+    // Inner class to hold result for a single payroll calculation
     public static class PayrollResult {
         private int empId;
         private LocalDate date;
@@ -155,8 +176,11 @@ public class PayrollService {
         private double library;
         private double total;
 
+        // Constructor
         public PayrollResult() {
         }
+        
+        // Following setters and getters for each field
         
         public int getEmpId() {
             return empId;
@@ -174,7 +198,6 @@ public class PayrollService {
         	this.date = date;
         }
         
-
         public double getBase() {
             return base;
         }

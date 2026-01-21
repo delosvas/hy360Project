@@ -4,7 +4,24 @@ import java.time.LocalDate;
 
 import dao.ContractDAO;
 
+/*
+ * Employee
+ * 
+ * Model class that represents an employee of the University Payroll System.
+ * It stores personal, employment and administrative info.
+ * It contains a nested enumeration EmployeeType with display names
+ */
 public class Employee {
+	
+	/*
+	 *EmployeeType
+     *
+     * Enumeration describing the four categories of employees:
+     *   PA = Permanent Administrative
+     *   CA = Contract Administrative
+     *   PT = Permanent Teaching
+     *   CT = Contract Teaching
+	 */
     public enum EmployeeType {
         PA,
         CA,
@@ -27,7 +44,7 @@ public class Employee {
         }
     }
     
-    private int id;
+    private int id; // Unique Identifier, auto-generated
     private String fullName;
     private EmployeeType type;
     private int deptId;
@@ -38,10 +55,13 @@ public class Employee {
     private String bankName;
     private LocalDate startDate;
     private boolean isActive;
-
+    
     public Employee() {
     }
 
+    /*
+     * Constructor for creating a new employee object
+     */
     public Employee(String fullName, EmployeeType type, int deptId, boolean isMarried,
             LocalDate startDate) {
         this.fullName = fullName;
@@ -51,6 +71,8 @@ public class Employee {
         this.startDate = startDate;
         this.isActive = true;
     }
+    
+    // Following setters and Getters for every field
 
     public int getId() {
         return id;
