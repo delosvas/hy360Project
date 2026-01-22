@@ -177,11 +177,11 @@ public class ReportsPanel extends JPanel {
 
         if ("Payroll Status per Category".equals(selected)) {
        
-            sql = "SELECT e.emp_type, COUNT(*) employee_count, SUM(total_amount) AS total_cost, "
+            sql = "SELECT e.emp_type, COUNT(DISTINCT e.emp_id) employee_count, SUM(total_amount) AS total_cost, "
             		+ "AVG(total_amount) AS average_salary, YEAR(payment_date) AS payment_year, MONTH(payment_date) AS payment_month " +
                     "FROM payroll_log p JOIN employees e ON p.emp_id = e.emp_id "
-            		+ "GROUP BY payment_year, payment_month, emp_type "
-                    + "ORDER BY payment_year DESC, payment_month DESC, emp_type";
+            		+ "GROUP BY emp_type "
+                    + "ORDER BY emp_type";
 
         } else if ("Salary Stats (Min/Max/Avg) per Category".equals(selected)) {
             
