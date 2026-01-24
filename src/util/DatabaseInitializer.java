@@ -6,9 +6,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Database Initializer 
+ * Database Initializer
  * 
- * Utility class that creates database and tables if they don't exist 
+ * Utility class that creates database and tables if they don't exist
  */
 public class DatabaseInitializer {
 
@@ -159,30 +159,33 @@ public class DatabaseInitializer {
                                                                 +
                                                                 "FROM employees e " +
                                                                 "LEFT JOIN departments d ON e.dept_id = d.dept_id " +
-                                                                "WHERE e.is_active = TRUE " +
+                                                                "WHERE (e.emp_type IN ('PA', 'PT') AND e.is_active = TRUE) "
+                                                                +
+                                                                "OR (e.emp_type IN ('CA', 'CT') AND e.is_active = TRUE AND EXISTS (SELECT 1 FROM contracts c WHERE e.emp_id = c.emp_id AND CURRENT_DATE BETWEEN c.start_date AND c.end_date)) "
+                                                                +
                                                                 "ORDER BY e.emp_type, e.full_name");
 
                                 // View 2: Contract Renewal Status
                                 stmt.executeUpdate(
                                                 "CREATE OR REPLACE VIEW view_contract_renewal_status AS "
-                                                			+ "SELECT "
-                                                			+ "	e.emp_id,"
-                                                			+ "	e.full_name,"
-                                                			+ "	d.name AS department,"
-                                                			+ "	c.contract_id,"
-                                                			+ "	c.start_date,"
-                                                			+ "	c.end_date,"
-                                                			+ "	CASE "
-                                                			+ "		WHEN DATEDIFF(c.end_date, CURDATE())<=30 THEN \"URGENT: Less than a month left\""
-                                                			+ "		WHEN DATEDIFF(c.end_date, CURDATE())<=60 THEN \"RENEWAL IS NEEDED\""
-                                                			+ "		ELSE 'OK'"
-                                                			+ "	END AS renewal_message"
-                                                			+ "	FROM employees e "
-                                                			+ "	JOIN contracts c ON e.emp_id=c.emp_id"
-                                                			+ "	JOIN departments d ON d.dept_id=e.dept_id"
-                                                			+ "	WHERE e.is_active = TRUE"
-                                                			+ "		AND (e.emp_type='CA' OR e.emp_type='CT')"
-                                                			+ "	    AND CURDATE()<=c.end_date;");
+                                                                + "SELECT "
+                                                                + "	e.emp_id,"
+                                                                + "	e.full_name,"
+                                                                + "	d.name AS department,"
+                                                                + "	c.contract_id,"
+                                                                + "	c.start_date,"
+                                                                + "	c.end_date,"
+                                                                + "	CASE "
+                                                                + "		WHEN DATEDIFF(c.end_date, CURDATE())<=30 THEN \"URGENT: Less than a month left\""
+                                                                + "		WHEN DATEDIFF(c.end_date, CURDATE())<=60 THEN \"RENEWAL IS NEEDED\""
+                                                                + "		ELSE 'OK'"
+                                                                + "	END AS renewal_message"
+                                                                + "	FROM employees e "
+                                                                + "	JOIN contracts c ON e.emp_id=c.emp_id"
+                                                                + "	JOIN departments d ON d.dept_id=e.dept_id"
+                                                                + "	WHERE e.is_active = TRUE"
+                                                                + "		AND (e.emp_type='CA' OR e.emp_type='CT')"
+                                                                + "	    AND CURDATE()<=c.end_date;");
 
                                 // View 3: Employee Full Details
                                 stmt.executeUpdate(

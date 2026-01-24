@@ -6,8 +6,6 @@ import dao.EmployeeDAO;
 import model.Child;
 import model.Department;
 import model.Employee;
-import util.DateUtils;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -50,10 +48,12 @@ public class UpdateEmployeeDialog extends JDialog {
     private JTextField txtBank = new JTextField(15);
 
     /*
-     * Constructor that builds the dialog UI and loads all the data from the employees table
+     * Constructor that builds the dialog UI and loads all the data from the
+     * employees table
      * 
      * @param owner The parent window
-     * @param emp   The employee to be edited
+     * 
+     * @param emp The employee to be edited
      */
     public UpdateEmployeeDialog(Window owner, Employee emp) {
         super(owner, "Edit Employee Details", ModalityType.APPLICATION_MODAL);
@@ -72,49 +72,85 @@ public class UpdateEmployeeDialog extends JDialog {
         formPanel.setBorder(BorderFactory.createTitledBorder("Employee Details"));
 
         // Disable uneditable fields (Type, Start Date)
-        formPanel.add(new JLabel("ID:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("ID:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         JTextField txtId = new JTextField(String.valueOf(emp.getId()));
         txtId.setEditable(false);
         formPanel.add(txtId);
 
         // Type
-        formPanel.add(new JLabel("Type:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Type:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         JTextField txtType = new JTextField(emp.getType().toString());
         txtType.setEditable(false);
         formPanel.add(txtType);
 
         // Name
-        formPanel.add(new JLabel("Full Name:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Full Name:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtName.setText(emp.getFullName());
         formPanel.add(txtName);
 
         // Department
-        formPanel.add(new JLabel("Department:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Department:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         loadDepartments(emp.getDeptId());
         formPanel.add(cmbDept);
 
         // Marital Status
-        formPanel.add(new JLabel("Marital Status:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Marital Status:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         chkMarried.setSelected(emp.isMarried());
         formPanel.add(chkMarried);
 
         // Address
-        formPanel.add(new JLabel("Address:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Address:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtAddress.setText(emp.getAddress());
         formPanel.add(txtAddress);
 
         // Phone
-        formPanel.add(new JLabel("Phone:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Phone:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtPhone.setText(emp.getPhone());
         formPanel.add(txtPhone);
 
         // IBAN
-        formPanel.add(new JLabel("IBAN:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("IBAN:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtIban.setText(emp.getIban());
         formPanel.add(txtIban);
 
         // Bank Name
-        formPanel.add(new JLabel("Bank Name:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Bank Name:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtBank.setText(emp.getBankName());
         formPanel.add(txtBank);
 
@@ -134,16 +170,16 @@ public class UpdateEmployeeDialog extends JDialog {
         };
         childTable = new JTable(childTableModel);
         childTable.setRowHeight(20);
-        childTable.setFont(new Font("Arial" ,Font.PLAIN, 12));
+        childTable.setFont(new Font("Arial", Font.PLAIN, 12));
         childTable.getTableHeader().setFont(new Font("Arial", Font.PLAIN, 12));
         childrenPanel.add(new JScrollPane(childTable), BorderLayout.CENTER);
 
         JPanel childBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnAddChild = new JButton("Add Child");
-        btnAddChild.setFont(new Font("Arial" ,Font.PLAIN, 12));
+        btnAddChild.setFont(new Font("Arial", Font.PLAIN, 12));
         JButton btnRemoveChild = new JButton("Remove Child");
-        btnRemoveChild.setFont(new Font("Arial" ,Font.PLAIN, 12));
-        
+        btnRemoveChild.setFont(new Font("Arial", Font.PLAIN, 12));
+
         // Adding the buttons to the panel
         childBtnPanel.add(btnAddChild);
         childBtnPanel.add(btnRemoveChild);
@@ -165,9 +201,9 @@ public class UpdateEmployeeDialog extends JDialog {
         // Save and Cancel Buttons
         JPanel buttonPanel = new JPanel();
         JButton btnSave = new JButton("Update");
-        btnSave.setFont(new Font("Arial" ,Font.PLAIN, 12));
+        btnSave.setFont(new Font("Arial", Font.PLAIN, 12));
         JButton btnCancel = new JButton("Cancel");
-        btnCancel.setFont(new Font("Arial" ,Font.PLAIN, 12));
+        btnCancel.setFont(new Font("Arial", Font.PLAIN, 12));
 
         buttonPanel.add(btnSave);
         buttonPanel.add(btnCancel);
@@ -181,7 +217,7 @@ public class UpdateEmployeeDialog extends JDialog {
     }
 
     /*
-     * Method that loads all the departments from the database 
+     * Method that loads all the departments from the database
      * and fills the combo box
      * 
      * @param currentDeptId
@@ -201,7 +237,8 @@ public class UpdateEmployeeDialog extends JDialog {
     }
 
     /*
-     * Loads all children associated with the employee and displays them in the table.
+     * Loads all children associated with the employee and displays them in the
+     * table.
      */
     private void loadChildren() {
         try {
@@ -214,7 +251,8 @@ public class UpdateEmployeeDialog extends JDialog {
     }
 
     /*
-     * This method adds a new child to the temporary list after validating the birth date
+     * This method adds a new child to the temporary list after validating the birth
+     * date
      */
     private void onAddChild() {
         String birthDateStr = JOptionPane.showInputDialog(this, "Enter Child Birth Date (YYYY-MM-DD):");
@@ -256,7 +294,7 @@ public class UpdateEmployeeDialog extends JDialog {
     }
 
     /*
-     * Refreshes  the children table to reflect the temporary list.
+     * Refreshes the children table to reflect the temporary list.
      */
     private void refreshChildTable() {
         childTableModel.setRowCount(0);
@@ -265,7 +303,9 @@ public class UpdateEmployeeDialog extends JDialog {
             int age = c.getAge(now);
             boolean isMinor = c.isMinor(now);
             childTableModel.addRow(new Object[] {
-                    DateUtils.formatDate(c.getBirthDate()),
+                    (c.getBirthDate() != null
+                            ? c.getBirthDate().format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                            : ""),
                     age,
                     isMinor ? "Yes" : "No"
             });
@@ -274,12 +314,12 @@ public class UpdateEmployeeDialog extends JDialog {
 
     /*
      * Saves all changes made to the the employee and the children
-     * in the database, by updating employee basic info, deleting all 
+     * in the database, by updating employee basic info, deleting all
      * existing children and re-inserting the updated children list
      */
     private void saveChanges() {
         try {
-        	// Update employee fields
+            // Update employee fields
             currentEmployee.setFullName(txtName.getText().trim());
             Department d = (Department) cmbDept.getSelectedItem();
             if (d != null)
@@ -315,7 +355,7 @@ public class UpdateEmployeeDialog extends JDialog {
             isSaved = true;
             JOptionPane.showMessageDialog(this, "Employee updated successfully.", "Success",
                     JOptionPane.INFORMATION_MESSAGE);
-            dispose(); // Close dialog 
+            dispose(); // Close dialog
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Invalid number format.", "Error", JOptionPane.ERROR_MESSAGE);

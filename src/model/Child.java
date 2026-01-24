@@ -1,6 +1,5 @@
 package model;
 
-import util.DateUtils;
 import java.time.LocalDate;
 
 /*
@@ -11,9 +10,9 @@ import java.time.LocalDate;
  */
 public class Child {
     private int childId; // Unique Identifier
-    private int empId; /// Foreign key 
+    private int empId; /// Foreign key
     private LocalDate birthDate; // Child birth date
-    
+
     public Child() {
     }
 
@@ -26,7 +25,7 @@ public class Child {
     }
 
     // Following setters and Getters for every field
-    
+
     public int getChildId() {
         return childId;
     }
@@ -50,12 +49,13 @@ public class Child {
     public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
-    
+
     /*
      * Reveals whether a child of an employee is a minor or not based on its
      * birth date
      * 
      * @param date The date on which to check minor status
+     * 
      * @return true if child is under 18, false otherwise
      */
     public boolean isMinor(LocalDate date) {
@@ -66,6 +66,7 @@ public class Child {
      * Calculates the age of a child in full years
      * 
      * @param date The reference date
+     * 
      * @return Age in years
      */
     public int getAge(LocalDate date) {
@@ -77,6 +78,8 @@ public class Child {
      */
     @Override
     public String toString() {
-        return "Birth Date: " + DateUtils.formatDate(birthDate);
+        return "Birth Date: "
+                + (birthDate != null ? birthDate.format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                        : "");
     }
 }

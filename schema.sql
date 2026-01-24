@@ -198,6 +198,7 @@ WHERE
 	OR
 	(
 		e.emp_type IN ('CA', 'CT')
+		AND e.is_active = TRUE
 		AND EXISTS (
 			SELECT 1
 			FROM contracts c
@@ -229,11 +230,7 @@ SELECT
 		AND (e.emp_type='CA' OR e.emp_type='CT')
 		AND CURDATE()<=c.end_date;
 	
--- delete these after execution of MySql / phpMyAdmin
-DROP VIEW IF EXISTS view_monthly_cost_by_category;
-DROP VIEW IF EXISTS view_payroll_statistics;
-DROP VIEW IF EXISTS view_monthly_payroll_analysis;
-DROP VIEW IF EXISTS view_pay_slip_details;
+
 
 
 

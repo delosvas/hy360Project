@@ -8,7 +8,6 @@ import model.Child;
 import model.Contract;
 import model.Department;
 import model.Employee;
-import util.DateUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -62,14 +61,14 @@ public class AddEmployeeDialog extends JDialog {
     private JTextField txtContractAmount = new JTextField(10);
 
     /*
-     * Constructor for this class that builds the dialog and is 
+     * Constructor for this class that builds the dialog and is
      * responsible for the DAOs' initialization
      * 
      * @param owner
      */
     public AddEmployeeDialog(Window owner) {
         super(owner, "Hire New Employee", ModalityType.APPLICATION_MODAL);
-        
+
         // DAOs' initialization
         employeeDAO = new EmployeeDAO();
         contractDAO = new ContractDAO();
@@ -88,41 +87,77 @@ public class AddEmployeeDialog extends JDialog {
         formPanel.setBackground(new Color(250, 250, 250));
 
         // Name
-        formPanel.add(new JLabel("Full Name (*):") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Full Name (*):") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtName.setToolTipText("Required. The full name of the employee.");
         formPanel.add(txtName);
 
         // Type
-        formPanel.add(new JLabel("Employee Type:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Employee Type:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         formPanel.add(cmbType);
 
         // Department
-        formPanel.add(new JLabel("Department (*):") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Department (*):") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         loadDepartments();
         formPanel.add(cmbDept);
 
         // Marital Status
-        formPanel.add(new JLabel("Marital Status:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Marital Status:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         formPanel.add(chkMarried);
 
         // Address
-        formPanel.add(new JLabel("Address:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Address:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         formPanel.add(txtAddress);
 
         // Phone
-        formPanel.add(new JLabel("Phone:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Phone:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         formPanel.add(txtPhone);
 
         // IBAN
-        formPanel.add(new JLabel("IBAN:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("IBAN:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         formPanel.add(txtIban);
 
         // Bank Name
-        formPanel.add(new JLabel("Bank Name:") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Bank Name:") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         formPanel.add(txtBank);
 
         // Start date field which is not editable and auto-filled
-        formPanel.add(new JLabel("Start Date (YYYY-MM-DD) (*):") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        formPanel.add(new JLabel("Start Date (YYYY-MM-DD) (*):") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtStartDate.setToolTipText("Format: YYYY-MM-DD. Used for Experience Allowance calculation.");
         txtStartDate.setEditable(false);
         txtStartDate.setFocusable(false);
@@ -143,20 +178,20 @@ public class AddEmployeeDialog extends JDialog {
                 return false;
             }
         };
-        
+
         childTable = new JTable(childTableModel);
         childTable.setRowHeight(24);
-        childTable.setFont(new Font("Arial" ,Font.PLAIN, 14));
-        childTable.getTableHeader().setFont(new Font("Arial" ,Font.PLAIN, 12));
+        childTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        childTable.getTableHeader().setFont(new Font("Arial", Font.PLAIN, 12));
         childrenPanel.add(new JScrollPane(childTable), BorderLayout.CENTER);
 
         // Buttons for adding or removing a child from the employee
         JPanel childBtnPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton btnAddChild = new JButton("Add Child");
-        btnAddChild.setFont(new Font("Arial" ,Font.PLAIN, 12));
+        btnAddChild.setFont(new Font("Arial", Font.PLAIN, 12));
         JButton btnRemoveChild = new JButton("Remove Child");
-        btnRemoveChild.setFont(new Font("Arial" ,Font.PLAIN, 12));
-        
+        btnRemoveChild.setFont(new Font("Arial", Font.PLAIN, 12));
+
         // Adding the buttons to the panel
         childBtnPanel.add(btnAddChild);
         childBtnPanel.add(btnRemoveChild);
@@ -171,11 +206,19 @@ public class AddEmployeeDialog extends JDialog {
         contractPanel.setBorder(BorderFactory.createTitledBorder("Contract Details"));
         contractPanel.setBackground(new Color(250, 250, 250));
 
-        contractPanel.add(new JLabel("Contract End Date (*):") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        contractPanel.add(new JLabel("Contract End Date (*):") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtContractEnd.setToolTipText("Required for Contract employees.");
         contractPanel.add(txtContractEnd);
 
-        contractPanel.add(new JLabel("Gross Salary Amount (*):") {{setFont(new Font("Arial" ,Font.PLAIN, 12));}});
+        contractPanel.add(new JLabel("Gross Salary Amount (*):") {
+            {
+                setFont(new Font("Arial", Font.PLAIN, 12));
+            }
+        });
         txtContractAmount.setToolTipText("Monthly gross salary.");
         contractPanel.add(txtContractAmount);
 
@@ -197,9 +240,9 @@ public class AddEmployeeDialog extends JDialog {
         JButton btnCancel = new JButton("Cancel");
 
         buttonPanel.add(btnSave);
-        btnSave.setFont(new Font("Arial" ,Font.PLAIN, 12));
+        btnSave.setFont(new Font("Arial", Font.PLAIN, 12));
         buttonPanel.add(btnCancel);
-        btnCancel.setFont(new Font("Arial" ,Font.PLAIN, 12));
+        btnCancel.setFont(new Font("Arial", Font.PLAIN, 12));
         add(buttonPanel, BorderLayout.SOUTH);
 
         btnCancel.addActionListener(e -> dispose());
@@ -209,9 +252,9 @@ public class AddEmployeeDialog extends JDialog {
         pack();
         setLocationRelativeTo(owner);
     }
-   
+
     /*
-     * Method that loads all the departments from the database 
+     * Method that loads all the departments from the database
      * and fills the combo box
      */
     private void loadDepartments() {
@@ -231,11 +274,11 @@ public class AddEmployeeDialog extends JDialog {
      */
     private void updateContractVisibility() {
         Employee.EmployeeType type = (Employee.EmployeeType) cmbType.getSelectedItem();
-        
+
         // Checking if employee is the contract type
         boolean isContract = (type == Employee.EmployeeType.CA || type == Employee.EmployeeType.CT);
         contractPanel.setVisible(isContract);
-        pack();  // Resizing dialog 
+        pack(); // Resizing dialog
     }
 
     /*
@@ -255,7 +298,7 @@ public class AddEmployeeDialog extends JDialog {
                 Child child = new Child(); // Create child
                 child.setBirthDate(birthDate);
                 tempChildrenList.add(child); // Add in temporary list
-                refreshChildTable(); // Refresh table 
+                refreshChildTable(); // Refresh table
 
             } catch (DateTimeParseException e) {
                 JOptionPane.showMessageDialog(this, "Invalid date format. Please use YYYY-MM-DD.", "Error",
@@ -285,12 +328,14 @@ public class AddEmployeeDialog extends JDialog {
     private void refreshChildTable() {
         childTableModel.setRowCount(0); // clear table
         LocalDate now = LocalDate.now();
-        
+
         for (Child c : tempChildrenList) {
             int age = c.getAge(now);
             boolean isMinor = c.isMinor(now);
             childTableModel.addRow(new Object[] {
-                    DateUtils.formatDate(c.getBirthDate()),
+                    (c.getBirthDate() != null
+                            ? c.getBirthDate().format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+                            : ""),
                     age,
                     isMinor ? "Yes" : "No"
             });
@@ -298,8 +343,9 @@ public class AddEmployeeDialog extends JDialog {
     }
 
     /*
-     * Validates all fields needed and saves and inserts the employee, children and the 
-     *  contract (in case of contract employee), in the database
+     * Validates all fields needed and saves and inserts the employee, children and
+     * the
+     * contract (in case of contract employee), in the database
      */
     private void saveEmployee() {
         try {
@@ -324,8 +370,8 @@ public class AddEmployeeDialog extends JDialog {
             emp.setBankName(txtBank.getText().trim());
             LocalDate startDate = LocalDate.parse(txtStartDate.getText().trim());
 
-            //Enforcing payroll policy meaning that the start date must be 
-            //the 1st of the month
+            // Enforcing payroll policy meaning that the start date must be
+            // the 1st of the month
             if (startDate.getDayOfMonth() != 1) {
                 LocalDate adjustedDate = startDate.plusMonths(1).withDayOfMonth(1);
                 JOptionPane.showMessageDialog(this,
@@ -362,15 +408,15 @@ public class AddEmployeeDialog extends JDialog {
                 LocalDate endDate = LocalDate.parse(txtContractEnd.getText().trim());
                 double amount = Double.parseDouble(txtContractAmount.getText().trim());
 
-                // Validating contract end date 
+                // Validating contract end date
                 if (endDate.isBefore(startDate)) {
-                   
+
                     JOptionPane.showMessageDialog(this,
                             "Contract End Date cannot be before Start Date.\nWarning: Employee was created but Contract failed.",
-                            "Validation Error", JOptionPane.WARNING_MESSAGE);     
+                            "Validation Error", JOptionPane.WARNING_MESSAGE);
                     // For now, return allows the user to correct input, but the employee is already
                     // saved.
-                    
+
                 } else {
                     Contract contract = new Contract(empId, startDate, endDate, amount);
                     contractDAO.addContract(contract);
@@ -381,12 +427,12 @@ public class AddEmployeeDialog extends JDialog {
             isSaved = true;
             JOptionPane.showMessageDialog(this, "Employee hired successfully!", "Success",
                     JOptionPane.INFORMATION_MESSAGE);
-            dispose(); // Close dialog 
+            dispose(); // Close dialog
 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Invalid number for Amount.",
                     "Validation Error", JOptionPane.ERROR_MESSAGE);
-            return; 
+            return;
         } catch (DateTimeParseException ex) {
             JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.", "Validation Error",
                     JOptionPane.ERROR_MESSAGE);

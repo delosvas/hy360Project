@@ -1,7 +1,6 @@
 package gui;
 
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicTabbedPaneUI;
 
 import java.awt.*;
 
@@ -17,22 +16,22 @@ import java.awt.*;
  */
 public class MainFrame extends JFrame {
 
-	/*
-	 * Constructor initializes the main frame, the header and adds to it the tabs
-	 */
+    /*
+     * Constructor initializes the main frame, the header and adds to it the tabs
+     */
     public MainFrame() {
-    	
+
         setTitle("University of Crete Payroll System"); // Title of the main window
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1000, 700);
         setLocationRelativeTo(null);
-        
-        // Header Label 
+
+        // Header Label
         JLabel title = new JLabel("University of Crete Payroll System", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
         title.setForeground(new Color(20, 60, 120));
         title.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        
+
         add(title, BorderLayout.NORTH);
 
         // Use a customized tabbed pane for navigation
@@ -40,19 +39,20 @@ public class MainFrame extends JFrame {
         tabbedPane.setFont(new Font("Arial", Font.BOLD, 16));
         tabbedPane.setBackground(new Color(230, 240, 255));
         tabbedPane.setForeground(new Color(30, 60, 120));
-       
+
         // Adding all needed panels as tabs
         tabbedPane.addTab("Employees", new EmployeesPanel());
         tabbedPane.addTab("Payroll Processing", new PayrollPanel());
         tabbedPane.addTab("Salary & Allowances Management", new SettingsPanel());
         tabbedPane.addTab("Reports / Queries", new ReportsPanel());
-  
+        tabbedPane.addTab("Database Views", new ViewsPanel());
+
         add(tabbedPane, BorderLayout.CENTER);
 
     }
-    
+
     /*
-     * Launch method for the application window 
+     * Launch method for the application window
      */
     public static void launch() {
         SwingUtilities.invokeLater(() -> {
