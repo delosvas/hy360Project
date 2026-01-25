@@ -191,19 +191,19 @@ SELECT
 FROM employees e
 LEFT JOIN departments d ON e.dept_id = d.dept_id
 WHERE
-	(
-		e.emp_type IN ('PA', 'PT')
-		AND e.is_active = TRUE
-	) 
-	OR
-	(
-		e.emp_type IN ('CA', 'CT')
-		AND e.is_active = TRUE
-		AND EXISTS (
-			SELECT 1
-			FROM contracts c
-			WHERE e.emp_id = c.emp_id
-				AND CURRENT_DATE BETWEEN c.start_date AND c.end_date
+	e.start_date <= CURRENT_DATE()
+	AND e.is_active = TRUE
+	AND(
+		e.emp_type IN ('PA', 'PT')	
+		OR(
+			e.emp_type IN ('CA', 'CT')
+			AND e.is_active = TRUE
+			AND EXISTS (
+				SELECT 1
+				FROM contracts c
+				WHERE e.emp_id = c.emp_id
+					AND CURRENT_DATE BETWEEN c.start_date AND c.end_date
+			)
 		)
 	)
 ORDER BY e.emp_type, e.full_name;

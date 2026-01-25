@@ -303,6 +303,7 @@ public class AddEmployeeDialog extends JDialog {
             } catch (DateTimeParseException e) {
                 JOptionPane.showMessageDialog(this, "Invalid date format. Please use YYYY-MM-DD.", "Error",
                         JOptionPane.ERROR_MESSAGE);
+                return;
             }
         }
     }
@@ -391,23 +392,22 @@ public class AddEmployeeDialog extends JDialog {
                         JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
-            // 1. Save Employee
-            int empId = employeeDAO.addEmployee(emp);
-
-            // 2. Save Children
-            for (Child c : tempChildrenList) {
-                c.setEmpId(empId); // Assign foreign key
-                childDAO.addChild(c);
-            }
-
-            // 3. Save Contract if needed
+            
+            
+            // In case of contract check the fields
             boolean isContract = (emp.getType() == Employee.EmployeeType.CA
                     || emp.getType() == Employee.EmployeeType.CT);
+            LocalDate endDate=null;
+        	double amount=0;
             if (isContract) {
-                LocalDate endDate = LocalDate.parse(txtContractEnd.getText().trim());
-                double amount = Double.parseDouble(txtContractAmount.getText().trim());
-
+            	try {
+            		endDate = LocalDate.parse(txtContractEnd.getText().trim());
+            		 amount = Double.parseDouble(txtContractAmount.getText().trim());
+            	} catch (DateTimeParseException ex) {
+            		 JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.", "Validation Error",
+                             JOptionPane.ERROR_MESSAGE);
+                     return;
+            	}
                 // Validating contract end date
                 if (endDate.isBefore(startDate)) {
 
@@ -416,11 +416,24 @@ public class AddEmployeeDialog extends JDialog {
                             "Validation Error", JOptionPane.WARNING_MESSAGE);
                     // For now, return allows the user to correct input, but the employee is already
                     // saved.
+                    return;
 
-                } else {
-                    Contract contract = new Contract(empId, startDate, endDate, amount);
-                    contractDAO.addContract(contract);
                 }
+                
+            }
+            // 1. Save Employee
+            int empId = employeeDAO.addEmployee(emp);
+
+            // 2. Save Children
+            for (Child c : tempChildrenList) {
+                c.setEmpId(empId); // Assign foreign key
+                childDAO.addChild(c);
+            }
+            
+            // 3. Save Contract if needed
+            if (isContract) {
+            	Contract contract = new Contract(empId,startDate, endDate, amount);
+            	contractDAO.addContract(contract);
             }
 
             // Successfully saved an employee
@@ -432,10 +445,6 @@ public class AddEmployeeDialog extends JDialog {
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Invalid number for Amount.",
                     "Validation Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        } catch (DateTimeParseException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid date format. Use YYYY-MM-DD.", "Validation Error",
-                    JOptionPane.ERROR_MESSAGE);
             return;
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(this, "Database Error: " + ex.getMessage(), "Error",
