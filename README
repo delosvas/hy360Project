@@ -1,16 +1,44 @@
-άλλαξα την λειτουργεια του active/inactive ώστε να θεωρείται ένας υπάλληλος active με το που ξεκινάει 
-η προσληψή του (δηλ. πρωτη του μήνα). Έπισης παρατηρησα ότι οταν εκανα hire εναν υπαλληλο αν ειχα καταλαθος 
-λαθος φορματ στην ημερομηνια και σε καποια αλλα πεδια εβγαζε το μηνυμα αλλα ο υπαλληλος αποθηκευοταν με το λαθος
-στην βαση, τωρα ειναι οκευ. Μετά αλλαξα το πεδιο του start date στην προσληψη ενος υπαλληλου ωστε να μην μπορει 
-να αλλαχθει η ημερομηνια απο την χρηστη και μετα γινουν αναδρομικες οι προσληψεις. Είδα οτι με το ερωτημα της 
-Κατάσταση μισθοδοσίας ανά κατηγορία προσωπικού εχει καποιο θεμα με τις κατηγοριες γιατι αντι να εμφανιζει τις 
-4 εμφανιζει μονο τις PA, PT επι 2, αυτο δεν το διορθωσα. Νομίζω ολα τα υπολοιπα ειναι κομπλε. 
+# University Payroll System
 
-Για Powershell:
-compile:
-javac -cp ".;mysql-connector-j-8.0.33.jar" -d out (Get-ChildItem -Recurse -Filter *.java src).FullName
+A Java-based payroll management system for university employees featuring a Swing GUI and a MySQL backend.
 
-run:
-java -cp "out;mysql-connector-j-8.0.33.jar" Main
+## Authors
+Pandelis Vasilakis** (csd5112)
+Sofia Euthimiadi** (csd5394)
+Paraskevi Mourelatou** (csd5149)
 
-με maven ktlp its differant and honestly i dont know google it 
+## Features
+Employee Management:** Hire, update details,  view employee profiles.
+Payroll Processing:** Calculate monthly salaries, including allowances .
+Contract Management:** Track contract durations and renewal status for temporary staff.
+
+## Requirements
+ Java JDK 
+ MySQL Server (8.0+)
+ MySQL Connector/J (mysql-connector-j-8.0.33.jar)
+
+## Configuration (Important)
+Before compiling, please check the database credentials in src/util/DatabaseInitializer.java.
+By default, the system assumes:
+ URL: localhost:3306
+ User:  root
+ Password:  1234
+
+
+### Linux - macOS / Windows
+
+1. Compilation:
+
+javac -cp ".:mysql-connector-j-8.0.33.jar" -d out $(find src -name "*.java")
+
+javac -cp ".:mysql-connector-j-8.0.33.jar" -d out src/**/*.java
+
+
+## Running
+
+
+java -cp "out:mysql-connector-j-8.0.33.jar" Main
+
+## Database Setup
+
+Ensure MySQL is running and configured. The system will automatically initialize the database schema.
