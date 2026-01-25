@@ -3,14 +3,14 @@
 A Java-based payroll management system for university employees featuring a Swing GUI and a MySQL backend.
 
 ## Authors
-Pandelis Vasilakis** (csd5112)
-Sofia Euthimiadi** (csd5394)
-Paraskevi Mourelatou** (csd5149)
+Pandelis Vasilakis (csd5112)
+Sofia Euthimiadi (csd5394)
+Paraskevi Mourelatou (csd5149)
 
 ## Features
-Employee Management:** Hire, update details,  view employee profiles.
-Payroll Processing:** Calculate monthly salaries, including allowances .
-Contract Management:** Track contract durations and renewal status for temporary staff.
+Employee Management: Hire, update details,  view employee profiles.
+Payroll Processing: Calculate monthly salaries, including allowances .
+Contract Management: Track contract durations and renewal status for temporary staff.
 
 ## Requirements
  Java JDK 
